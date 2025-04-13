@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  sku: MyString
+  weight: 9.99
+  volume: 9.99
+  required_temperature: 1
+  organization: one
+  status: MyString
+
+two:
+  name: MyString
+  sku: MyString
+  weight: 9.99
+  volume: 9.99
+  required_temperature: 1
+  organization: two
+  status: MyString

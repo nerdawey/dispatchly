@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  trip: one
+  vehicle: one
+  status: MyString
+  estimated_start_time: 2025-04-14 01:19:15
+  estimated_completion_time: 2025-04-14 01:19:15
+  total_distance: 9.99
+
+two:
+  trip: two
+  vehicle: two
+  status: MyString
+  estimated_start_time: 2025-04-14 01:19:15
+  estimated_completion_time: 2025-04-14 01:19:15
+  total_distance: 9.99
