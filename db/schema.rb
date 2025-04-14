@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_14_130611) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_14_183805) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -115,7 +115,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_14_130611) do
     t.string "password_digest", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "role"
+    t.bigint "organization_id"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["organization_id"], name: "index_users_on_organization_id"
   end
 
   create_table "vehicles", force: :cascade do |t|
@@ -146,6 +149,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_14_130611) do
   add_foreign_key "products", "organizations"
   add_foreign_key "sessions", "users"
   add_foreign_key "trips", "organizations"
+  add_foreign_key "users", "organizations"
   add_foreign_key "vehicles", "locations", column: "current_location_id"
   add_foreign_key "vehicles", "organizations"
 end
