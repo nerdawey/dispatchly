@@ -1,5 +1,5 @@
 # app/controllers/api/v1/trip_controller.rb
-class Api::V1::TripController < ApplicationController
+class Api::V1::TripsController < ApplicationController
     before_action :set_trip, only: [:show, :update, :destroy, :optimize]
     
     # GET /api/v1/trip
