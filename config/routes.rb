@@ -1,5 +1,7 @@
 # config/routes.rb
 Rails.application.routes.draw do
+  resource :session
+  resources :passwords, param: :token
   namespace :api do
     namespace :v1 do
       post '/login', to: 'authentication#login'

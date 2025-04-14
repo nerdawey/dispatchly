@@ -1,10 +1,9 @@
 class User < ApplicationRecord
-  belongs_to :organization
-  
+  enum role: { super_admin: 0, org_admin: 1, planner: 2, dispatcher: 3 }
+
   has_secure_password
-  
-  enum role: { admin: 0, planner: 1, dispatcher: 2 }
-  
-  validates :email, presence: true, uniqueness: true
-  validates :first_name, :last_name, presence: true
+  has_many :sessions, dependent: :destroy
+
+  belongs_to :organization, optional: true
+  normalizes :email_address, with: ->(e) { e.strip.downcase }
 end

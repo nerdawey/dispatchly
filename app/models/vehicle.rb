@@ -1,4 +1,7 @@
+# app/models/vehicle.rb
 class Vehicle < ApplicationRecord
   belongs_to :organization
-  belongs_to :current_location
+  has_many :trips
+
+  validates :capacity, presence: true
 end

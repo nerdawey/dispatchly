@@ -1,5 +1,6 @@
 # app/controllers/application_controller.rb
 class ApplicationController < ActionController::API
+  include Authentication
     include ActionController::MimeResponds
     
     before_action :authorize_request

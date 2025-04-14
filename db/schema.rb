@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_13_231915) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_14_130611) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -91,6 +91,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_13_231915) do
     t.index ["organization_id"], name: "index_products_on_organization_id"
   end
 
+  create_table "sessions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "ip_address"
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
   create_table "trips", force: :cascade do |t|
     t.string "name"
     t.bigint "organization_id", null: false
@@ -102,16 +111,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_13_231915) do
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "email"
-    t.string "password_digest"
-    t.string "first_name"
-    t.string "last_name"
-    t.integer "role"
-    t.bigint "organization_id", null: false
-    t.string "status"
+    t.string "email_address", null: false
+    t.string "password_digest", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["organization_id"], name: "index_users_on_organization_id"
+    t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
   create_table "vehicles", force: :cascade do |t|
@@ -140,8 +144,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_13_231915) do
   add_foreign_key "orders", "locations", column: "pickup_location_id"
   add_foreign_key "orders", "organizations"
   add_foreign_key "products", "organizations"
+  add_foreign_key "sessions", "users"
   add_foreign_key "trips", "organizations"
-  add_foreign_key "users", "organizations"
   add_foreign_key "vehicles", "locations", column: "current_location_id"
   add_foreign_key "vehicles", "organizations"
 end
