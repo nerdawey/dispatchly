@@ -11,7 +11,7 @@ User.create!(
   email_address: 'admin@example.com',
   password: 'supersecurepassword',
   password_confirmation: 'supersecurepassword',
-  role: :super_admin  
+  role: :super_admin
 )
 org = Organization.create!(
   name: "Acme Logistics"

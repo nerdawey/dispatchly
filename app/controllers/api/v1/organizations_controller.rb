@@ -26,9 +26,9 @@ class Api::V1::OrganizationsController < ApplicationController
     def destroy
         @organization = Organization.find(params[:id])
         if @organization.destroy
-            render json: { message: 'Organization deleted successfully' }, status: :ok
+            render json: { message: "Organization deleted successfully" }, status: :ok
         else
-            render json: { error: 'Failed to delete organization' }, status: :unprocessable_entity
+            render json: { error: "Failed to delete organization" }, status: :unprocessable_entity
         end
     end
 end
