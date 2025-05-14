@@ -1,0 +1,28 @@
+:concurrency: 5
+:queues:
+  - default
+  - mailers
+  - active_storage_analysis
+  - active_storage_purge
+  - vehicle_updates
+  - dispatch_retries
+  - trip_updates
+
+:max_retries: 3
+:retry_interval: 60
+
+:schedule:
+  vehicle_location_updater:
+    cron: '*/5 * * * *'
+    class: VehicleLocationUpdateJob
+    queue: vehicle_updates
+
+  dispatch_retry_processor:
+    cron: '*/15 * * * *'
+    class: DispatchRetryProcessorJob
+    queue: dispatch_retries
+
+  trip_status_updater:
+    cron: '*/1 * * * *'
+    class: TripStatusUpdateJob
+    queue: trip_updates 
