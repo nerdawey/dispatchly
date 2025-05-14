@@ -79,7 +79,7 @@ class Api::V1::TripsController < ApplicationController
           RedisService.track_active_trip(trip.id, {
             vehicle_id: trip.vehicle_id,
             order_ids: trip.orders.map(&:id),
-            status: 'created',
+            status: "created",
             created_at: Time.current
           })
         end
@@ -151,7 +151,7 @@ class Api::V1::TripsController < ApplicationController
         RedisService.track_active_trip(@trip.id, {
           vehicle_id: @trip.vehicle_id,
           order_ids: optimized_orders.map(&:id),
-          status: 'optimized',
+          status: "optimized",
           optimized_at: Time.current
         })
         
@@ -169,9 +169,9 @@ class Api::V1::TripsController < ApplicationController
       
       if cached_trip
         render json: {
-          status: cached_trip['status'],
-          current_location: cached_trip['current_location'],
-          updated_at: cached_trip['updated_at']
+          status: cached_trip["status"],
+          current_location: cached_trip["current_location"],
+          updated_at: cached_trip["updated_at"]
         }
       else
         render json: {
@@ -182,7 +182,7 @@ class Api::V1::TripsController < ApplicationController
     end
 
     def complete
-      if @trip.update(status: 'completed', completed_at: Time.current)
+      if @trip.update(status: "completed", completed_at: Time.current)
         # Remove from active trips in Redis
         RedisService.remove_active_trip(@trip.id)
         

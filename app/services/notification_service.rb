@@ -2,10 +2,10 @@ class NotificationService
   def notify_dispatch_failure(orders)
     # Log the failure
     Rails.logger.error("Dispatch failure for orders: #{orders.map(&:id).join(', ')}")
-    
+
     # Notify dispatchers
     notify_dispatchers(orders)
-    
+
     # Notify customers if needed
     notify_customers(orders)
   end
@@ -15,20 +15,20 @@ class NotificationService
   def notify_dispatchers(orders)
     # Get all active dispatchers
     dispatchers = User.dispatchers.active
-    
+
     dispatchers.each do |dispatcher|
       # Send email notification
       DispatcherMailer.dispatch_failure_notification(
         dispatcher,
         orders
       ).deliver_later
-      
+
       # Send in-app notification
       Notification.create!(
         user: dispatcher,
-        title: 'Dispatch Failure',
+        title: "Dispatch Failure",
         message: "Failed to assign #{orders.size} orders to vehicles",
-        notification_type: 'dispatch_failure',
+        notification_type: "dispatch_failure",
         metadata: {
           order_ids: orders.map(&:id),
           failure_time: Time.current
@@ -48,4 +48,4 @@ class NotificationService
       end
     end
   end
-end 
+end

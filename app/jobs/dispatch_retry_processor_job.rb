@@ -12,18 +12,18 @@ class DispatchRetryProcessorJob
   def process_failed_dispatch(failed_dispatch)
     # Get the original orders
     orders = failed_dispatch.orders
-    
+
     # Check if there are any available vehicles now
     available_vehicles = Vehicle.available
-    
+
     if available_vehicles.any?
       begin
         # Try dispatch again
         DispatchAlgorithmService.new(orders, available_vehicles).call
-        
+
         # Mark as resolved if successful
         failed_dispatch.resolve!
-        
+
         # Log success
         Rails.logger.info("Successfully retried dispatch for failed_dispatch_id: #{failed_dispatch.id}")
       rescue StandardError => e
@@ -33,17 +33,17 @@ class DispatchRetryProcessorJob
     else
       # Update retry count
       failed_dispatch.increment!(:retry_count)
-      
+
       # If too many retries, mark as permanently failed
       if failed_dispatch.retry_count >= 3
         failed_dispatch.update!(
-          status: 'permanently_failed',
+          status: "permanently_failed",
           resolved_at: Time.current
         )
-        
+
         # Notify about permanent failure
         NotificationService.new.notify_permanent_dispatch_failure(failed_dispatch)
       end
     end
   end
-end 
+end

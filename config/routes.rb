@@ -18,7 +18,7 @@ Rails.application.routes.draw do
       end
 
       # Failed Dispatches
-      resources :failed_dispatches, only: [:index, :show] do
+      resources :failed_dispatches, only: [ :index, :show ] do
         member do
           post :retry
           post :resolve

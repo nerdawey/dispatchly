@@ -15,7 +15,7 @@ class VehicleAssignmentService
         if suitable_vehicle
           assignments << { vehicle: suitable_vehicle, orders: orders }
           vehicles.delete(suitable_vehicle)
-          
+
           # Cache vehicle location
           RedisService.cache_vehicle_location(
             suitable_vehicle.id,
@@ -61,11 +61,11 @@ class VehicleAssignmentService
     def calculate_estimated_delivery_time(vehicle, order)
       # Get vehicle location from Redis cache
       vehicle_location = RedisService.get_vehicle_location(vehicle.id)
-      
+
       if vehicle_location
         current_location = OpenStruct.new(
-          latitude: vehicle_location['latitude'],
-          longitude: vehicle_location['longitude']
+          latitude: vehicle_location["latitude"],
+          longitude: vehicle_location["longitude"]
         )
       else
         current_location = vehicle.current_location
@@ -77,17 +77,17 @@ class VehicleAssignmentService
       travel_time = calculate_travel_time(current_location, order.pickup_location)
       pickup_time = current_time + travel_time
       delivery_time = pickup_time + calculate_travel_time(order.pickup_location, order.dropoff_location)
-      
+
       delivery_time
     end
 
     def calculate_travel_time(from, to)
       # Basic implementation - should be replaced with actual routing service
       distance = Geocoder::Calculations.distance_between(
-        [from.latitude, from.longitude],
-        [to.latitude, to.longitude]
+        [ from.latitude, from.longitude ],
+        [ to.latitude, to.longitude ]
       )
-      
+
       # Assume average speed of 30 km/h
       (distance / 30.0) * 3600 # Convert to seconds
     end

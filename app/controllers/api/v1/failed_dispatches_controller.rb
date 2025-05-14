@@ -1,6 +1,6 @@
 class Api::V1::FailedDispatchesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_failed_dispatch, only: [:show, :retry, :resolve]
+  before_action :set_failed_dispatch, only: [ :show, :retry, :resolve ]
 
   def index
     @failed_dispatches = FailedDispatch
@@ -47,7 +47,7 @@ class Api::V1::FailedDispatchesController < ApplicationController
 
       render json: {
         message: "Dispatch retried successfully",
-        trips: trips.as_json(include: [:vehicle, :orders])
+        trips: trips.as_json(include: [ :vehicle, :orders ])
       }
     rescue StandardError => e
       render json: { error: e.message }, status: :unprocessable_entity
@@ -55,7 +55,7 @@ class Api::V1::FailedDispatchesController < ApplicationController
   end
 
   def resolve
-    if @failed_dispatch.update(status: 'resolved', resolved_at: Time.current)
+    if @failed_dispatch.update(status: "resolved", resolved_at: Time.current)
       render json: { message: "Failed dispatch marked as resolved" }
     else
       render json: { errors: @failed_dispatch.errors }, status: :unprocessable_entity
@@ -81,4 +81,4 @@ class Api::V1::FailedDispatchesController < ApplicationController
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Failed dispatch not found" }, status: :not_found
   end
-end 
+end

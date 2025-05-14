@@ -4,7 +4,7 @@ class TripStatusUpdateJob
   def perform
     # Get all active trips from Redis
     active_trips = get_active_trips
-    
+
     active_trips.each do |trip_id, trip_data|
       process_trip_status(trip_id, trip_data)
     end
@@ -39,10 +39,10 @@ class TripStatusUpdateJob
     # Check if all orders in the trip are delivered
     trip.orders.all? do |order|
       distance_to_dropoff = Geocoder::Calculations.distance_between(
-        [vehicle_location['latitude'], vehicle_location['longitude']],
-        [order.dropoff_location.latitude, order.dropoff_location.longitude]
+        [ vehicle_location["latitude"], vehicle_location["longitude"] ],
+        [ order.dropoff_location.latitude, order.dropoff_location.longitude ]
       )
-      
+
       # Consider order delivered if within 100 meters of dropoff
       distance_to_dropoff <= 0.1
     end
@@ -51,14 +51,14 @@ class TripStatusUpdateJob
   def complete_trip(trip)
     # Update trip status
     trip.update!(
-      status: 'completed',
+      status: "completed",
       completed_at: Time.current
     )
 
     # Update order statuses
     trip.orders.each do |order|
       order.update!(
-        status: 'delivered',
+        status: "delivered",
         delivered_at: Time.current
       )
     end
@@ -75,9 +75,9 @@ class TripStatusUpdateJob
     RedisService.track_active_trip(trip.id, {
       vehicle_id: trip.vehicle_id,
       order_ids: trip.orders.map(&:id),
-      status: 'in_progress',
+      status: "in_progress",
       current_location: vehicle_location,
       updated_at: Time.current
     })
   end
-end 
+end
