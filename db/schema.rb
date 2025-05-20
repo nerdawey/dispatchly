@@ -59,9 +59,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_14_183805) do
     t.datetime "pickup_time_window_end"
     t.datetime "delivery_deadline"
     t.string "status"
-    t.string "order_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "order_type"
     t.index ["delivery_location_id"], name: "index_orders_on_delivery_location_id"
     t.index ["organization_id"], name: "index_orders_on_organization_id"
     t.index ["pickup_location_id"], name: "index_orders_on_pickup_location_id"
