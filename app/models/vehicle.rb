@@ -5,12 +5,15 @@ class Vehicle < ApplicationRecord
   has_many :trips
 
   validates :name, presence: true
+  validates :plate_number, presence: true
   validates :capacity_volume, presence: true
   validates :capacity_weight, presence: true
-  validates :organization_id, presence: true
-  validates :current_location_id, presence: true
+  validates :min_temp, presence: true
+  validates :max_temp, presence: true
+  validates :status, presence: true
+  validates :cost_per_km, presence: true
 
   def capacity
-    [capacity_volume, capacity_weight].min
+    [ capacity_volume, capacity_weight ].min
   end
 end

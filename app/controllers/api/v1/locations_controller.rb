@@ -1,4 +1,5 @@
 class Api::V1::LocationsController < ApplicationController
+    load_and_authorize_resource
     before_action :set_location, only: [ :show, :update, :destroy ]
 
     # GET /api/v1/locations
@@ -33,7 +34,7 @@ class Api::V1::LocationsController < ApplicationController
 
     # DELETE /api/v1/locations/:id
     def destroy
-      render json: { error: 'Deleting locations is not allowed.' }, status: :method_not_allowed
+      render json: { error: "Deleting locations is not allowed." }, status: :method_not_allowed
     end
 
     private
@@ -45,12 +46,12 @@ class Api::V1::LocationsController < ApplicationController
     end
 
     def location_params
-      params.require(:location).permit(
-        :name,
+      params.expect(
+        location: [ :name,
         :address,
         :latitude,
         :longitude,
-        :organization_id
+        :organization_id ]
       )
     end
 end

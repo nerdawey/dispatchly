@@ -2,9 +2,14 @@ require "test_helper"
 
 class Api::V1::ProductsControllerTest < ActionDispatch::IntegrationTest
   setup do
+    @organization = organizations(:one)
     @product = products(:one)
-    @user = users(:one)  # Using org_admin user
+    @user = users(:one)  # Using org_admin user from organization one
     @headers = setup_auth_headers(@user)
+    setup_ability(@user)
+
+    # Ensure product belongs to the same organization as the user
+    @product.update!(organization_id: @organization.id)
   end
 
   test "should get index" do

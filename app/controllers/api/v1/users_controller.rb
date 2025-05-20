@@ -1,5 +1,6 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :set_user, only: [:show, :update, :destroy]
+  load_and_authorize_resource
+  before_action :set_user, only: [ :show, :update, :destroy ]
 
   def index
     @users = current_user.organization.users
@@ -41,6 +42,6 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:email_address, :password, :role, :organization_id)
+    params.expect(user: [ :email_address, :password, :role, :organization_id ])
   end
 end

@@ -1,5 +1,6 @@
 class Api::V1::OrganizationsController < ApplicationController
-    before_action :set_organization, only: [:show, :update, :destroy]
+    load_and_authorize_resource
+    before_action :set_organization, only: [ :show, :update, :destroy ]
 
     def index
         @organizations = Organization.all
@@ -25,7 +26,15 @@ class Api::V1::OrganizationsController < ApplicationController
     end
     def destroy
         ActiveRecord::Base.transaction do
+            # Delete all dependent records
+            @organization.users.destroy_all
             @organization.locations.destroy_all
+            @organization.vehicles.destroy_all
+            @organization.products.destroy_all
+            @organization.orders.destroy_all
+            @organization.trips.destroy_all
+
+            # Finally delete the organization
             @organization.destroy
             head :no_content
         end
@@ -42,6 +51,13 @@ class Api::V1::OrganizationsController < ApplicationController
     end
 
     def organization_params
-        params.require(:organization).permit(:name, :address, :contact_email, :contact_phone, :subscription_tier, :status)
+        params.expect(
+            organization: [ :name,
+            :address,
+            :contact_email,
+            :contact_phone,
+            :subscription_tier,
+            :status ]
+        )
     end
 end

@@ -1,4 +1,5 @@
 class Api::V1::VehiclesController < ApplicationController
+    load_and_authorize_resource
     before_action :set_vehicle, only: [ :show, :update, :destroy ]
 
     # GET /api/v1/vehicles
@@ -51,6 +52,17 @@ class Api::V1::VehiclesController < ApplicationController
     end
 
     def vehicle_params
-      params.require(:vehicle).permit(:name, :capacity_volume, :capacity_weight, :organization_id, :current_location_id)
+      params.expect(
+        vehicle: [ :name,
+        :plate_number,
+        :capacity_volume,
+        :capacity_weight,
+        :min_temp,
+        :max_temp,
+        :organization_id,
+        :current_location_id,
+        :status,
+        :cost_per_km ]
+      )
     end
 end

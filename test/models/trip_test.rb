@@ -4,15 +4,15 @@ class TripTest < ActiveSupport::TestCase
   test "valid trip" do
     organization = organizations(:one)
     vehicle = vehicles(:one)
-    
+
     trip = Trip.new(
       name: "Test Trip",
-      organization: organization,
-      vehicle: vehicle,
-      status: "pending",
-      scheduled_date: Time.current,
+      status: "scheduled",
+      scheduled_date: Time.zone.today,
       start_time: Time.current,
-      end_time: Time.current + 2.hours
+      end_time: 2.hours.from_now,
+      organization: organization,
+      vehicle: vehicle
     )
     assert trip.valid?
   end
@@ -20,111 +20,111 @@ class TripTest < ActiveSupport::TestCase
   test "invalid without name" do
     organization = organizations(:one)
     vehicle = vehicles(:one)
-    
+
     trip = Trip.new(
-      organization: organization,
-      vehicle: vehicle,
-      status: "pending",
-      scheduled_date: Time.current,
+      status: "scheduled",
+      scheduled_date: Time.zone.today,
       start_time: Time.current,
-      end_time: Time.current + 2.hours
+      end_time: 2.hours.from_now,
+      organization: organization,
+      vehicle: vehicle
     )
-    refute trip.valid?
+    assert_not trip.valid?
     assert_includes trip.errors[:name], "can't be blank"
-  end
-
-  test "invalid without organization_id" do
-    vehicle = vehicles(:one)
-    
-    trip = Trip.new(
-      name: "Test Trip",
-      vehicle: vehicle,
-      status: "pending",
-      scheduled_date: Time.current,
-      start_time: Time.current,
-      end_time: Time.current + 2.hours
-    )
-    refute trip.valid?
-    assert_includes trip.errors[:organization_id], "can't be blank"
-  end
-
-  test "invalid without vehicle_id" do
-    organization = organizations(:one)
-    
-    trip = Trip.new(
-      name: "Test Trip",
-      organization: organization,
-      status: "pending",
-      scheduled_date: Time.current,
-      start_time: Time.current,
-      end_time: Time.current + 2.hours
-    )
-    refute trip.valid?
-    assert_includes trip.errors[:vehicle_id], "can't be blank"
   end
 
   test "invalid without status" do
     organization = organizations(:one)
     vehicle = vehicles(:one)
-    
+
     trip = Trip.new(
       name: "Test Trip",
-      organization: organization,
-      vehicle: vehicle,
-      scheduled_date: Time.current,
+      scheduled_date: Time.zone.today,
       start_time: Time.current,
-      end_time: Time.current + 2.hours
+      end_time: 2.hours.from_now,
+      organization: organization,
+      vehicle: vehicle
     )
-    refute trip.valid?
+    assert_not trip.valid?
     assert_includes trip.errors[:status], "can't be blank"
   end
 
   test "invalid without scheduled_date" do
     organization = organizations(:one)
     vehicle = vehicles(:one)
-    
+
     trip = Trip.new(
       name: "Test Trip",
-      organization: organization,
-      vehicle: vehicle,
-      status: "pending",
+      status: "scheduled",
       start_time: Time.current,
-      end_time: Time.current + 2.hours
+      end_time: 2.hours.from_now,
+      organization: organization,
+      vehicle: vehicle
     )
-    refute trip.valid?
+    assert_not trip.valid?
     assert_includes trip.errors[:scheduled_date], "can't be blank"
   end
 
   test "invalid without start_time" do
     organization = organizations(:one)
     vehicle = vehicles(:one)
-    
+
     trip = Trip.new(
       name: "Test Trip",
+      status: "scheduled",
+      scheduled_date: Time.zone.today,
+      end_time: 2.hours.from_now,
       organization: organization,
-      vehicle: vehicle,
-      status: "pending",
-      scheduled_date: Time.current,
-      end_time: Time.current + 2.hours
+      vehicle: vehicle
     )
-    refute trip.valid?
+    assert_not trip.valid?
     assert_includes trip.errors[:start_time], "can't be blank"
   end
 
   test "invalid without end_time" do
     organization = organizations(:one)
     vehicle = vehicles(:one)
-    
+
     trip = Trip.new(
       name: "Test Trip",
+      status: "scheduled",
+      scheduled_date: Time.zone.today,
+      start_time: Time.current,
       organization: organization,
-      vehicle: vehicle,
-      status: "pending",
-      scheduled_date: Time.current,
-      start_time: Time.current
+      vehicle: vehicle
     )
-    refute trip.valid?
+    assert_not trip.valid?
     assert_includes trip.errors[:end_time], "can't be blank"
+  end
+
+  test "invalid without organization" do
+    vehicle = vehicles(:one)
+
+    trip = Trip.new(
+      name: "Test Trip",
+      status: "scheduled",
+      scheduled_date: Time.zone.today,
+      start_time: Time.current,
+      end_time: 2.hours.from_now,
+      vehicle: vehicle
+    )
+    assert_not trip.valid?
+    assert_includes trip.errors[:organization], "must exist"
+  end
+
+  test "invalid without vehicle" do
+    organization = organizations(:one)
+
+    trip = Trip.new(
+      name: "Test Trip",
+      status: "scheduled",
+      scheduled_date: Time.zone.today,
+      start_time: Time.current,
+      end_time: 2.hours.from_now,
+      organization: organization
+    )
+    assert_not trip.valid?
+    assert_includes trip.errors[:vehicle], "must exist"
   end
 
   # test "the truth" do

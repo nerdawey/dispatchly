@@ -2,12 +2,12 @@
 class Api::V1::AuthenticationController < ApplicationController
   
   def login
-    user_params = params.require(:authentication).permit(:email_address, :password)
+    user_params = params.expect(authentication: [ :email_address, :password ])
     @user = User.find_by(email_address: user_params[:email_address])
   
     if @user&.authenticate(user_params[:password])
       token = JsonWebToken.encode(user_id: @user.id)
-      time = Time.now + 24.hours.to_i
+      time = Time.zone.now + 24.hours.to_i
   
       response = {
         token: token,

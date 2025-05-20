@@ -55,6 +55,6 @@ class Api::V1::LocationsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_response :method_not_allowed
     response_data = JSON.parse(@response.body)
-    assert_equal 'Deleting locations is not allowed.', response_data["error"]
+    assert_equal "Deleting locations is not allowed.", response_data["error"]
   end
 end

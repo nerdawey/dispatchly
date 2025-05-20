@@ -1,4 +1,5 @@
 class Api::V1::ProductsController < ApplicationController
+    load_and_authorize_resource
     before_action :set_product, only: [ :show, :update, :destroy ]
 
     # GET /api/v1/products
@@ -51,14 +52,14 @@ class Api::V1::ProductsController < ApplicationController
     end
 
     def product_params
-      params.require(:product).permit(
-        :name,
-        :sku,
+      params.expect(
+        product: [ :name,
+        :description,
         :weight,
         :volume,
+        :storage_temperature,
         :required_temperature,
-        :organization_id,
-        :storage_temperature
+        :organization_id ]
       )
     end
 end

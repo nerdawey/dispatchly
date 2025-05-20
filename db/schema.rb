@@ -83,7 +83,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_20_052017) do
     t.string "sku"
     t.decimal "weight"
     t.decimal "volume"
-    t.integer "required_temperature"
+    t.integer "required_temperature", null: false
     t.bigint "organization_id", null: false
     t.string "status"
     t.datetime "created_at", null: false

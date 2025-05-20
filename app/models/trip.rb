@@ -7,8 +7,6 @@ class Trip < ApplicationRecord
   validates :name, presence: true
   validates :status, presence: true
   validates :scheduled_date, presence: true
-  validates :vehicle_id, presence: true
-  validates :organization_id, presence: true
   validates :start_time, presence: true
   validates :end_time, presence: true
 

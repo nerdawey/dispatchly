@@ -2,51 +2,25 @@ class Ability
   include CanCan::Ability
 
   def initialize(user)
-    user ||= User.new # guest user (not logged in)
-    role = user.role # Assumes User model has a 'role' attribute
+    return unless user
 
-    case role
-    when "Super Admin"
+    case user.role
+    when "super_admin"
       can :manage, :all
-      cannot :dispatch, Order
-    when "Organizational Account"
-      can :login, :all
-      can [ :read, :write, :update, :delete ], User
-      can [ :read, :write, :update, :delete ], Order
-      can [ :read, :write, :update ], :manage_order
-      can [ :read, :write, :update, :delete ], Location
-      can [ :read, :write, :update, :delete ], Product
-      can [ :read, :write, :update, :delete ], Vehicle
-      can [ :read, :write, :update, :delete ], Trip
-      can [ :read, :write ], :view_history
-      can :dispatch, Order
-      cannot :manage, Organization
-    when "Planning User"
-      can :login, :all
-      can [ :read, :write, :update, :delete ], Order
-      can [ :read, :write, :update ], :manage_order
-      can [ :read, :write, :update ], Location
-      can [ :read, :write, :update ], Product
-      can [ :read, :write ], :view_history
-      cannot [ :add, :edit ], User
-      cannot :dispatch, Order
-      cannot :manage, Organization
-      cannot :manage, Vehicle
-      cannot :create, Trip
-    when "Dispatching User"
-      can :login, :all
-      can [ :read, :write ], :manage_order
-      can [ :read, :write, :update, :delete ], Trip
-      can [ :read, :write ], :view_history
-      can :dispatch, Order
-      cannot :manage, Organization
-      cannot [ :add, :edit ], User
-      cannot :manage, Location
-      cannot :manage, Product
-      cannot :manage, Vehicle
-      cannot :create, Order
-    else
-      # Guest permissions (if any)
+    when "org_admin"
+      can :manage, [ Location, Product, Vehicle, Order, Trip ], organization_id: user.organization_id
+      can :manage, User, organization_id: user.organization_id
+      can :read, Organization, id: user.organization_id
+      can :update, Organization, id: user.organization_id
+    when "planner"
+      can :read, [ Location, Product, Vehicle, Order, Trip ], organization_id: user.organization_id
+      can :create, [ Order, Trip ], organization_id: user.organization_id
+      can :update, [ Order, Trip ], organization_id: user.organization_id
+      can :read, Organization, id: user.organization_id
+    when "dispatcher"
+      can :read, [ Location, Product, Vehicle, Order, Trip ], organization_id: user.organization_id
+      can :update, [ Vehicle, Trip ], organization_id: user.organization_id
+      can :read, Organization, id: user.organization_id
     end
   end
 end

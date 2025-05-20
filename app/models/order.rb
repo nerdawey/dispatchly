@@ -9,9 +9,6 @@ class Order < ApplicationRecord
   belongs_to :trip, optional: true
 
   validates :order_number, presence: true
-  validates :organization_id, presence: true
-  validates :pickup_location_id, presence: true
-  validates :delivery_location_id, presence: true
   validates :pickup_time_window_start, presence: true
   validates :pickup_time_window_end, presence: true
   validates :delivery_deadline, presence: true

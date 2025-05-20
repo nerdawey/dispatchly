@@ -1,7 +1,9 @@
 # app/controllers/application_controller.rb
 class ApplicationController < ActionController::API
-  before_action :authenticate_user!
+  include ActionController::MimeResponds
+  include CanCan::Ability
 
+  before_action :authenticate_request
   attr_reader :current_user
 
   rescue_from CanCan::AccessDenied do |exception|
@@ -13,16 +15,17 @@ class ApplicationController < ActionController::API
 
   private
 
-  def authenticate_user!
+  def authenticate_request
     header = request.headers['Authorization']
-    return unauthorized_request unless header.present?
-
-    token = header.split(' ').last
-    decoded = JsonWebToken.decode(token)
-    return unauthorized_request unless decoded.present?
-
-    @current_user = User.find_by(id: decoded[:user_id])
-    return unauthorized_request unless @current_user
+    header = header.split(' ').last if header
+    begin
+      @decoded = JsonWebToken.decode(header)
+      @current_user = User.find(@decoded[:user_id])
+    rescue ActiveRecord::RecordNotFound => e
+      render json: { errors: e.message }, status: :unauthorized
+    rescue JWT::DecodeError => e
+      render json: { errors: e.message }, status: :unauthorized
+    end
   end
 
   def unauthorized_request

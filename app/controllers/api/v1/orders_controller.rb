@@ -1,5 +1,6 @@
 class Api::V1::OrdersController < ApplicationController
-  before_action :set_order, only: [:show, :update, :destroy]
+  load_and_authorize_resource
+  before_action :set_order, only: [ :show, :update, :destroy ]
 
   def index
     @orders = current_user.organization.orders
@@ -7,12 +8,12 @@ class Api::V1::OrdersController < ApplicationController
       .order(created_at: :desc)
 
     render json: {
-      orders: @orders.as_json(include: [:order_items, :pickup_location, :delivery_location])
+      orders: @orders.as_json(include: [ :order_items, :pickup_location, :delivery_location ])
     }
   end
 
   def show
-    render json: @order.as_json(include: [:order_items, :pickup_location, :delivery_location])
+    render json: @order.as_json(include: [ :order_items, :pickup_location, :delivery_location ])
   end
 
   def create
@@ -38,7 +39,7 @@ class Api::V1::OrdersController < ApplicationController
 
   def update
     if @order.update(order_params)
-      render json: @order.as_json(include: [:order_items, :pickup_location, :delivery_location])
+      render json: @order.as_json(include: [ :order_items, :pickup_location, :delivery_location ])
     else
       render json: { errors: @order.errors }, status: :unprocessable_entity
     end
@@ -91,8 +92,8 @@ class Api::V1::OrdersController < ApplicationController
   end
 
   def order_params
-    params.require(:order).permit(
-      :order_number,
+    params.expect(
+      order: [ :order_number,
       :organization_id,
       :pickup_location_id,
       :delivery_location_id,
@@ -100,7 +101,7 @@ class Api::V1::OrdersController < ApplicationController
       :pickup_time_window_end,
       :delivery_deadline,
       :status,
-      :order_type
+      :order_type ]
     )
   end
 end

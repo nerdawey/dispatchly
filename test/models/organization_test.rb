@@ -21,7 +21,7 @@ class OrganizationTest < ActiveSupport::TestCase
       subscription_tier: "basic",
       status: "active"
     )
-    refute organization.valid?
+    assert_not organization.valid?
     assert_includes organization.errors[:name], "can't be blank"
   end
 
@@ -33,7 +33,7 @@ class OrganizationTest < ActiveSupport::TestCase
       subscription_tier: "basic",
       status: "active"
     )
-    refute organization.valid?
+    assert_not organization.valid?
     assert_includes organization.errors[:address], "can't be blank"
   end
 
@@ -45,7 +45,7 @@ class OrganizationTest < ActiveSupport::TestCase
       subscription_tier: "basic",
       status: "active"
     )
-    refute organization.valid?
+    assert_not organization.valid?
     assert_includes organization.errors[:contact_email], "can't be blank"
   end
 
@@ -57,7 +57,7 @@ class OrganizationTest < ActiveSupport::TestCase
       subscription_tier: "basic",
       status: "active"
     )
-    refute organization.valid?
+    assert_not organization.valid?
     assert_includes organization.errors[:contact_phone], "can't be blank"
   end
 
@@ -69,7 +69,7 @@ class OrganizationTest < ActiveSupport::TestCase
       contact_phone: "123-456-7890",
       status: "active"
     )
-    refute organization.valid?
+    assert_not organization.valid?
     assert_includes organization.errors[:subscription_tier], "can't be blank"
   end
 
@@ -81,7 +81,7 @@ class OrganizationTest < ActiveSupport::TestCase
       contact_phone: "123-456-7890",
       subscription_tier: "basic"
     )
-    refute organization.valid?
+    assert_not organization.valid?
     assert_includes organization.errors[:status], "can't be blank"
   end
 

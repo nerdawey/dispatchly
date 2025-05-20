@@ -3,13 +3,24 @@
 <% password_digest = BCrypt::Password.create("password") %>
 
 one:
-  email_address: test@example.com
+  email_address: one@example.com
   password_digest: <%= BCrypt::Password.create('password') %>
   role: org_admin
-  organization_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  organization: one
 
 two:
-  email_address: test2@example.com
+  email_address: two@example.com
   password_digest: <%= BCrypt::Password.create('password') %>
   role: planner
-  organization_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  organization: one
+
+three:
+  email_address: three@example.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+  role: dispatcher
+  organization: one
+
+super_admin:
+  email_address: admin@example.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+  role: super_admin

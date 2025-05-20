@@ -9,7 +9,6 @@ class Product < ApplicationRecord
   validates :weight, presence: true, numericality: { greater_than: 0 }
   validates :volume, presence: true, numericality: { greater_than: 0 }
   validates :required_temperature, presence: true
-  validates :organization_id, presence: true
   validates :storage_temperature, presence: true
 
   enum :storage_temperature, { ambient: 0, chilled: 1, frozen: 2 }, prefix: true

@@ -28,7 +28,7 @@ class ApplicationControllerTest < ActionDispatch::IntegrationTest
     user = users(:one)
     user.update!(role: :dispatcher)
     headers = setup_auth_headers(user)
-    
+
     # Try to access a restricted endpoint
     get "/api/v1/organizations", headers: headers
     assert_response :forbidden

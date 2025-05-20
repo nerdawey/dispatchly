@@ -203,12 +203,12 @@ class Api::V1::TripsController < ApplicationController
     end
     
     def trip_params
-      params.require(:trip).permit(
-        :name,
+      params.expect(
+        trip: [:name,
         :vehicle_id,
         :status,
         :scheduled_date,
-        order_ids: []
+        order_ids: []]
       )
     end
   end

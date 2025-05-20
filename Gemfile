@@ -60,3 +60,5 @@ group :development, :test do
   gem 'rubocop-rspec', require: false
   gem 'bundler-audit', require: false
 end
+
+gem "database_cleaner-active_record", "~> 2.2"

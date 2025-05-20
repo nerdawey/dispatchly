@@ -28,8 +28,8 @@ class Api::V1::OrdersControllerTest < ActionDispatch::IntegrationTest
           pickup_location_id: locations(:one).id,
           delivery_location_id: locations(:two).id,
           pickup_time_window_start: Time.current,
-          pickup_time_window_end: Time.current + 1.hour,
-          delivery_deadline: Time.current + 2.hours,
+          pickup_time_window_end: 1.hour.from_now,
+          delivery_deadline: 2.hours.from_now,
           status: "pending",
           order_type: "outbound"
         }
