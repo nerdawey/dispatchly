@@ -1,13 +1,19 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  organization: one
-  status: MyString
+  name: Test Trip 1
+  organization_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  vehicle_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  status: pending
   scheduled_date: 2025-04-14
+  start_time: 2025-04-14 09:00:00
+  end_time: 2025-04-14 17:00:00
 
 two:
-  name: MyString
-  organization: two
-  status: MyString
-  scheduled_date: 2025-04-14
+  name: Test Trip 2
+  organization_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  vehicle_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  status: pending
+  scheduled_date: 2025-04-15
+  start_time: 2025-04-15 09:00:00
+  end_time: 2025-04-15 17:00:00

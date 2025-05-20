@@ -3,8 +3,8 @@ class Api::V1::ProductsController < ApplicationController
 
     # GET /api/v1/products
     def index
-      @products = Product.all
-      render json: @products
+      @products = current_user.organization.products
+      render json: { products: @products }
     end
 
     # GET /api/v1/products/:id
@@ -14,7 +14,7 @@ class Api::V1::ProductsController < ApplicationController
 
     # POST /api/v1/products
     def create
-      @product = Product.new(product_params)
+      @product = current_user.organization.products.new(product_params)
       if @product.save
         render json: @product, status: :created
       else
@@ -33,19 +33,32 @@ class Api::V1::ProductsController < ApplicationController
 
     # DELETE /api/v1/products/:id
     def destroy
-      @product.destroy
-      head :no_content
+      ActiveRecord::Base.transaction do
+        @product.order_items.destroy_all
+        @product.destroy
+        head :no_content
+      end
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
     end
 
     private
 
     def set_product
-      @product = Product.find(params[:id])
+      @product = current_user.organization.products.find(params[:id])
     rescue ActiveRecord::RecordNotFound
       render json: { error: "Product not found" }, status: :not_found
     end
 
     def product_params
-      params.require(:product).permit(:name, :description, :price, :storage_temperature)
+      params.require(:product).permit(
+        :name,
+        :sku,
+        :weight,
+        :volume,
+        :required_temperature,
+        :organization_id,
+        :storage_temperature
+      )
     end
 end

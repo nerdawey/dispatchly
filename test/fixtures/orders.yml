@@ -1,23 +1,23 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  order_number: MyString
-  organization: one
-  pickup_location: one
-  delivery_location: one
-  pickup_time_window_start: 2025-04-14 01:17:56
-  pickup_time_window_end: 2025-04-14 01:17:56
-  delivery_deadline: 2025-04-14 01:17:56
-  status: MyString
-  order_type: MyString
+  order_number: ORD-001
+  organization_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  pickup_location_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  delivery_location_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  pickup_time_window_start: 2025-04-14 09:00:00
+  pickup_time_window_end: 2025-04-14 10:00:00
+  delivery_deadline: 2025-04-14 17:00:00
+  status: pending
+  order_type: outbound
 
 two:
-  order_number: MyString
-  organization: two
-  pickup_location: two
-  delivery_location: two
-  pickup_time_window_start: 2025-04-14 01:17:56
-  pickup_time_window_end: 2025-04-14 01:17:56
-  delivery_deadline: 2025-04-14 01:17:56
-  status: MyString
-  order_type: MyString
+  order_number: ORD-002
+  organization_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  pickup_location_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  delivery_location_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  pickup_time_window_start: 2025-04-15 09:00:00
+  pickup_time_window_end: 2025-04-15 10:00:00
+  delivery_deadline: 2025-04-15 17:00:00
+  status: pending
+  order_type: outbound

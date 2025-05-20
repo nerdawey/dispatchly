@@ -1,17 +1,9 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  trip: one
-  vehicle: one
-  status: MyString
-  estimated_start_time: 2025-04-14 01:19:15
-  estimated_completion_time: 2025-04-14 01:19:15
-  total_distance: 9.99
+  trip_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  vehicle_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
 
 two:
-  trip: two
-  vehicle: two
-  status: MyString
-  estimated_start_time: 2025-04-14 01:19:15
-  estimated_completion_time: 2025-04-14 01:19:15
-  total_distance: 9.99
+  trip_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  vehicle_id: <%= ActiveRecord::FixtureSet.identify(:two) %>

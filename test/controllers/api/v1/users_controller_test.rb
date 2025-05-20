@@ -1,40 +1,48 @@
 require "test_helper"
 
-class Api::V1::UsersControllerTest < ActionController::TestCase
+class Api::V1::UsersControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:one)
-    @token = JsonWebToken.encode(user_id: @user.id)
-    @request.headers["Authorization"] = "Bearer #{@token}"
+    @headers = setup_auth_headers(@user)
   end
 
   test "should get index" do
-    get :index
+    get "/api/v1/users", headers: @headers
     assert_response :success
-    assert_not_nil assigns(:users)
+    assert_not_nil JSON.parse(@response.body)
   end
 
   test "should get show" do
-    get :show, params: { id: @user.id }
+    get "/api/v1/users/#{@user.id}", headers: @headers
     assert_response :success
     assert_equal @user.id, JSON.parse(@response.body)["id"]
   end
 
   test "should create user" do
     assert_difference("User.count") do
-      post :create, params: { user: { email_address: "new@example.com", password: "password", role: :org_admin, organization_id: 1 } }
+      post "/api/v1/users", headers: @headers, params: {
+        user: {
+          email_address: "new@example.com",
+          password: "password",
+          role: "planner",
+          organization_id: @user.organization_id
+        }
+      }
     end
     assert_response :created
   end
 
   test "should update user" do
-    patch :update, params: { id: @user.id, user: { email_address: "updated@example.com" } }
+    patch "/api/v1/users/#{@user.id}", headers: @headers, params: {
+      user: { email_address: "updated@example.com" }
+    }
     assert_response :success
     assert_equal "updated@example.com", JSON.parse(@response.body)["email_address"]
   end
 
   test "should destroy user" do
     assert_difference("User.count", -1) do
-      delete :destroy, params: { id: @user.id }
+      delete "/api/v1/users/#{@user.id}", headers: @headers
     end
     assert_response :no_content
   end

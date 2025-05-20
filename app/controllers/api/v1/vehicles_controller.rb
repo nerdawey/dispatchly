@@ -3,8 +3,8 @@ class Api::V1::VehiclesController < ApplicationController
 
     # GET /api/v1/vehicles
     def index
-      @vehicles = Vehicle.all
-      render json: @vehicles
+      @vehicles = current_user.organization.vehicles
+      render json: { vehicles: @vehicles }
     end
 
     # GET /api/v1/vehicles/:id
@@ -14,7 +14,7 @@ class Api::V1::VehiclesController < ApplicationController
 
     # POST /api/v1/vehicles
     def create
-      @vehicle = Vehicle.new(vehicle_params)
+      @vehicle = current_user.organization.vehicles.new(vehicle_params)
       if @vehicle.save
         render json: @vehicle, status: :created
       else
@@ -33,19 +33,24 @@ class Api::V1::VehiclesController < ApplicationController
 
     # DELETE /api/v1/vehicles/:id
     def destroy
-      @vehicle.destroy
-      head :no_content
+      ActiveRecord::Base.transaction do
+        @vehicle.assignments.destroy_all
+        @vehicle.destroy
+        head :no_content
+      end
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
     end
 
     private
 
     def set_vehicle
-      @vehicle = Vehicle.find(params[:id])
+      @vehicle = current_user.organization.vehicles.find(params[:id])
     rescue ActiveRecord::RecordNotFound
       render json: { error: "Vehicle not found" }, status: :not_found
     end
 
     def vehicle_params
-      params.require(:vehicle).permit(:capacity, :organization_id)
+      params.require(:vehicle).permit(:name, :capacity_volume, :capacity_weight, :organization_id, :current_location_id)
     end
 end

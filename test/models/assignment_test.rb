@@ -2,20 +2,34 @@ require "test_helper"
 
 class AssignmentTest < ActiveSupport::TestCase
   test "valid assignment" do
-    assignment = Assignment.new(trip_id: 1, order_id: 1)
+    trip = trips(:one)
+    vehicle = vehicles(:one)
+    
+    assignment = Assignment.new(
+      trip: trip,
+      vehicle: vehicle
+    )
     assert assignment.valid?
   end
 
   test "invalid without trip_id" do
-    assignment = Assignment.new(order_id: 1)
+    vehicle = vehicles(:one)
+    
+    assignment = Assignment.new(
+      vehicle: vehicle
+    )
     refute assignment.valid?
     assert_includes assignment.errors[:trip_id], "can't be blank"
   end
 
-  test "invalid without order_id" do
-    assignment = Assignment.new(trip_id: 1)
+  test "invalid without vehicle_id" do
+    trip = trips(:one)
+    
+    assignment = Assignment.new(
+      trip: trip
+    )
     refute assignment.valid?
-    assert_includes assignment.errors[:order_id], "can't be blank"
+    assert_includes assignment.errors[:vehicle_id], "can't be blank"
   end
 
   # test "the truth" do

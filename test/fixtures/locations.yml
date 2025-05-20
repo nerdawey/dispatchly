@@ -1,19 +1,15 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  address: MyString
-  latitude: 9.99
-  longitude: 9.99
-  organization: one
-  location_type: MyString
-  status: MyString
+  name: Test Location 1
+  address: 123 Test St
+  latitude: 40.7128
+  longitude: -74.0060
+  organization_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
 
 two:
-  name: MyString
-  address: MyString
-  latitude: 9.99
-  longitude: 9.99
-  organization: two
-  location_type: MyString
-  status: MyString
+  name: Test Location 2
+  address: 456 Test Ave
+  latitude: 40.7589
+  longitude: -73.9851
+  organization_id: <%= ActiveRecord::FixtureSet.identify(:two) %>

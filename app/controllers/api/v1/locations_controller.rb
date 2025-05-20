@@ -3,8 +3,8 @@ class Api::V1::LocationsController < ApplicationController
 
     # GET /api/v1/locations
     def index
-      @locations = Location.all
-      render json: @locations
+      @locations = current_user.organization.locations
+      render json: { locations: @locations }
     end
 
     # GET /api/v1/locations/:id
@@ -14,7 +14,7 @@ class Api::V1::LocationsController < ApplicationController
 
     # POST /api/v1/locations
     def create
-      @location = Location.new(location_params)
+      @location = current_user.organization.locations.new(location_params)
       if @location.save
         render json: @location, status: :created
       else
@@ -33,19 +33,24 @@ class Api::V1::LocationsController < ApplicationController
 
     # DELETE /api/v1/locations/:id
     def destroy
-      @location.destroy
-      head :no_content
+      render json: { error: 'Deleting locations is not allowed.' }, status: :method_not_allowed
     end
 
     private
 
     def set_location
-      @location = Location.find(params[:id])
+      @location = current_user.organization.locations.find(params[:id])
     rescue ActiveRecord::RecordNotFound
       render json: { error: "Location not found" }, status: :not_found
     end
 
     def location_params
-      params.require(:location).permit(:address, :latitude, :longitude)
+      params.require(:location).permit(
+        :name,
+        :address,
+        :latitude,
+        :longitude,
+        :organization_id
+      )
     end
 end

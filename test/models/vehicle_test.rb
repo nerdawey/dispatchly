@@ -2,20 +2,72 @@ require "test_helper"
 
 class VehicleTest < ActiveSupport::TestCase
   test "valid vehicle" do
-    vehicle = Vehicle.new(capacity: 100, organization_id: 1)
+    organization = organizations(:one)
+    current_location = locations(:one)
+    
+    vehicle = Vehicle.new(
+      name: "Test Vehicle",
+      organization: organization,
+      capacity_volume: 1000,
+      capacity_weight: 2000,
+      current_location: current_location
+    )
     assert vehicle.valid?
   end
 
-  test "invalid without capacity" do
-    vehicle = Vehicle.new(organization_id: 1)
+  test "invalid without name" do
+    organization = organizations(:one)
+    current_location = locations(:one)
+    
+    vehicle = Vehicle.new(
+      organization: organization,
+      capacity_volume: 1000,
+      capacity_weight: 2000,
+      current_location: current_location
+    )
     refute vehicle.valid?
-    assert_includes vehicle.errors[:capacity], "can't be blank"
+    assert_includes vehicle.errors[:name], "can't be blank"
   end
 
   test "invalid without organization_id" do
-    vehicle = Vehicle.new(capacity: 100)
+    current_location = locations(:one)
+    
+    vehicle = Vehicle.new(
+      name: "Test Vehicle",
+      capacity_volume: 1000,
+      capacity_weight: 2000,
+      current_location: current_location
+    )
     refute vehicle.valid?
     assert_includes vehicle.errors[:organization_id], "can't be blank"
+  end
+
+  test "invalid without capacity_volume" do
+    organization = organizations(:one)
+    current_location = locations(:one)
+    
+    vehicle = Vehicle.new(
+      name: "Test Vehicle",
+      organization: organization,
+      capacity_weight: 2000,
+      current_location: current_location
+    )
+    refute vehicle.valid?
+    assert_includes vehicle.errors[:capacity_volume], "can't be blank"
+  end
+
+  test "invalid without capacity_weight" do
+    organization = organizations(:one)
+    current_location = locations(:one)
+    
+    vehicle = Vehicle.new(
+      name: "Test Vehicle",
+      organization: organization,
+      capacity_volume: 1000,
+      current_location: current_location
+    )
+    refute vehicle.valid?
+    assert_includes vehicle.errors[:capacity_weight], "can't be blank"
   end
 
   # test "the truth" do
