@@ -1,6 +1,5 @@
 # app/controllers/api/v1/trip_controller.rb
 class Api::V1::TripsController < ApplicationController
-    before_action :authenticate_user!
     before_action :set_trip, only: [:show, :update, :destroy, :optimize, :status, :complete]
     
     # GET /api/v1/trip

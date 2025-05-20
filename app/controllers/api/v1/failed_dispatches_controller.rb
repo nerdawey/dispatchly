@@ -1,5 +1,4 @@
 class Api::V1::FailedDispatchesController < ApplicationController
-  before_action :authenticate_user!
   before_action :set_failed_dispatch, only: [ :show, :retry, :resolve ]
 
   def index
