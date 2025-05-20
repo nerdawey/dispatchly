@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  enum role: { super_admin: 1, org_admin: 2, planner: 3, dispatcher: 4 }
+  enum :role, { super_admin: 1, org_admin: 2, planner: 3, dispatcher: 4 }
   has_secure_password
   has_many :sessions, dependent: :destroy
   validate :organization_presence_unless_super_admin
