@@ -1,5 +1,5 @@
 class Order < ApplicationRecord
-  enum order_type: { outbound: 0, inbound: 1 }
+  enum :order_type, { outbound: 0, inbound: 1 }
 
   belongs_to :product
   belongs_to :pickup_location, class_name: "Location", optional: true
