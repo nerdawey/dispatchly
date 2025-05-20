@@ -88,6 +88,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_14_183805) do
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "storage_temperature", default: 0, null: false
     t.index ["organization_id"], name: "index_products_on_organization_id"
   end
 

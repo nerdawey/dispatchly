@@ -7,5 +7,5 @@ class Product < ApplicationRecord
   validates :name, :sku, presence: true
   validates :sku, uniqueness: { scope: :organization_id }
 
-  enum :storage_temperature, { ambient: 0, chilled: 1, frozen: 2 }
+  enum :storage_temperature, { ambient: 0, chilled: 1, frozen_temp: 2 }
 end
