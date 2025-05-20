@@ -26,4 +26,4 @@ class ApplicationController < ActionController::API
   def unauthorized_request
     render json: { error: 'Unauthorized' }, status: :unauthorized
   end
-end
+  end
