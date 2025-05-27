@@ -2,7 +2,7 @@
 class Trip < ApplicationRecord
   belongs_to :vehicle
   belongs_to :organization
-  has_many :orders
+  has_many :orders, dependent: :destroy
 
   validates :name, presence: true
   validates :status, presence: true

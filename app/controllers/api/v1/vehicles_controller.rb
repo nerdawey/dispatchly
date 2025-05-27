@@ -36,9 +36,14 @@ class Api::V1::VehiclesController < ApplicationController
     def destroy
       ActiveRecord::Base.transaction do
         @vehicle.assignments.destroy_all
-        @vehicle.destroy
-        head :no_content
+        if @vehicle.destroy
+          head :no_content
+        else
+          raise ActiveRecord::RecordNotDestroyed.new("Failed to destroy vehicle", @vehicle)
+        end
       end
+    rescue ActiveRecord::RecordNotDestroyed => e
+      render json: { error: e.message }, status: :unprocessable_entity
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end

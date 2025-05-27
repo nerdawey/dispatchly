@@ -1,10 +1,10 @@
 class Organization < ApplicationRecord
-  has_many :users
-  has_many :locations
-  has_many :vehicles
-  has_many :products
-  has_many :orders
-  has_many :trips
+  has_many :users, dependent: :destroy
+  has_many :locations, dependent: :destroy
+  has_many :vehicles, dependent: :destroy
+  has_many :products, dependent: :destroy
+  has_many :orders, dependent: :destroy
+  has_many :trips, dependent: :destroy
 
   validates :name, presence: true
   validates :address, presence: true

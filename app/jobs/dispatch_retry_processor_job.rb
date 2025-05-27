@@ -32,7 +32,7 @@ class DispatchRetryProcessorJob
       end
     else
       # Update retry count
-      failed_dispatch.increment!(:retry_count)
+      failed_dispatch.update(retry_count: failed_dispatch.retry_count + 1)
 
       # If too many retries, mark as permanently failed
       if failed_dispatch.retry_count >= 3

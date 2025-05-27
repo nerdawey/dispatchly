@@ -1,7 +1,7 @@
 # app/models/product.rb
 class Product < ApplicationRecord
   belongs_to :organization
-  has_many :order_items
+  has_many :order_items, dependent: :destroy
   has_many :orders, through: :order_items
 
   validates :name, presence: true

@@ -1,21 +1,32 @@
 class Api::V1::ProductsController < ApplicationController
-    load_and_authorize_resource
     before_action :set_product, only: [ :show, :update, :destroy ]
 
     # GET /api/v1/products
     def index
       @products = current_user.organization.products
+      if Rails.env.test?
+        Rails.logger.debug { "[CONTROLLER DEBUG] index - current_user: #{current_user.id}, org_id: #{current_user.organization_id}" }
+      end
+      authorize! :read, Product
       render json: { products: @products }
     end
 
     # GET /api/v1/products/:id
     def show
+      if Rails.env.test?
+        Rails.logger.debug { "[CONTROLLER DEBUG] show - current_user: #{current_user.id}, org_id: #{current_user.organization_id}, product: #{@product.id}, product_org_id: #{@product.organization_id}" }
+      end
+      authorize! :read, @product
       render json: @product
     end
 
     # POST /api/v1/products
     def create
+      authorize! :create, Product
       @product = current_user.organization.products.new(product_params)
+      if Rails.env.test?
+        Rails.logger.debug { "[CONTROLLER DEBUG] create - current_user: #{current_user.id}, org_id: #{current_user.organization_id}, product_org_id: #{@product.organization_id}" }
+      end
       if @product.save
         render json: @product, status: :created
       else
@@ -25,6 +36,10 @@ class Api::V1::ProductsController < ApplicationController
 
     # PATCH/PUT /api/v1/products/:id
     def update
+      if Rails.env.test?
+        Rails.logger.debug { "[CONTROLLER DEBUG] update - current_user: #{current_user.id}, org_id: #{current_user.organization_id}, product: #{@product.id}, product_org_id: #{@product.organization_id}" }
+      end
+      authorize! :update, @product
       if @product.update(product_params)
         render json: @product
       else
@@ -34,6 +49,10 @@ class Api::V1::ProductsController < ApplicationController
 
     # DELETE /api/v1/products/:id
     def destroy
+      if Rails.env.test?
+        Rails.logger.debug { "[CONTROLLER DEBUG] destroy - current_user: #{current_user.id}, org_id: #{current_user.organization_id}, product: #{@product.id}, product_org_id: #{@product.organization_id}" }
+      end
+      authorize! :destroy, @product
       ActiveRecord::Base.transaction do
         @product.order_items.destroy_all
         @product.destroy
@@ -59,7 +78,7 @@ class Api::V1::ProductsController < ApplicationController
         :volume,
         :storage_temperature,
         :required_temperature,
-        :organization_id ]
+        :sku ]
       )
     end
 end

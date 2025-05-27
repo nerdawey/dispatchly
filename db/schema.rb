@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_20_052017) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_27_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -90,6 +90,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_20_052017) do
     t.datetime "updated_at", null: false
     t.integer "storage_temperature", default: 0, null: false
     t.index ["organization_id"], name: "index_products_on_organization_id"
+    t.index ["sku", "organization_id"], name: "index_products_on_sku_and_organization_id", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -134,7 +135,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_20_052017) do
     t.integer "min_temp"
     t.integer "max_temp"
     t.bigint "organization_id", null: false
-    t.bigint "current_location_id", null: false
+    t.bigint "current_location_id"
     t.string "status"
     t.decimal "cost_per_km"
     t.datetime "created_at", null: false
@@ -145,17 +146,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_20_052017) do
 
   add_foreign_key "assignments", "trips"
   add_foreign_key "assignments", "vehicles"
-  add_foreign_key "locations", "organizations"
+  add_foreign_key "locations", "organizations", on_delete: :cascade
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "locations", column: "delivery_location_id"
   add_foreign_key "orders", "locations", column: "pickup_location_id"
-  add_foreign_key "orders", "organizations"
-  add_foreign_key "products", "organizations"
+  add_foreign_key "orders", "organizations", on_delete: :cascade
+  add_foreign_key "products", "organizations", on_delete: :cascade
   add_foreign_key "sessions", "users"
-  add_foreign_key "trips", "organizations"
+  add_foreign_key "trips", "organizations", on_delete: :cascade
   add_foreign_key "trips", "vehicles"
-  add_foreign_key "users", "organizations"
+  add_foreign_key "users", "organizations", on_delete: :cascade
   add_foreign_key "vehicles", "locations", column: "current_location_id"
-  add_foreign_key "vehicles", "organizations"
+  add_foreign_key "vehicles", "organizations", on_delete: :cascade
 end

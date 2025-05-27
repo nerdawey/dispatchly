@@ -4,7 +4,7 @@ class Order < ApplicationRecord
   belongs_to :organization
   belongs_to :pickup_location, class_name: "Location"
   belongs_to :delivery_location, class_name: "Location"
-  has_many :order_items
+  has_many :order_items, dependent: :destroy
   has_many :products, through: :order_items
   belongs_to :trip, optional: true
 

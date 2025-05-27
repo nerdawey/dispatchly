@@ -10,12 +10,24 @@ class Api::V1::ProductsControllerTest < ActionDispatch::IntegrationTest
 
     # Ensure product belongs to the same organization as the user
     @product.update!(organization_id: @organization.id)
+
+    if Rails.env.test?
+      puts "[TEST DEBUG] User Org ID: #{@user.organization_id}, Product Org ID: #{@product.organization_id}"
+    end
   end
 
   test "should get index" do
     get "/api/v1/products", headers: @headers
     assert_response :success
     assert_not_nil JSON.parse(@response.body)["products"]
+  end
+
+  test "should only show products from user's organization" do
+    other_product = products(:two) # belongs to a different organization
+    get "/api/v1/products", headers: @headers
+    product_ids = JSON.parse(@response.body)["products"].map { |p| p["id"] }
+    assert_includes product_ids, @product.id
+    assert_not_includes product_ids, other_product.id
   end
 
   test "should get show" do
@@ -33,7 +45,6 @@ class Api::V1::ProductsControllerTest < ActionDispatch::IntegrationTest
           weight: 1.5,
           volume: 2.0,
           required_temperature: 4.0,
-          organization_id: @user.organization_id,
           storage_temperature: "chilled"
         }
       }

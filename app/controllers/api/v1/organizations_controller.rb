@@ -3,7 +3,11 @@ class Api::V1::OrganizationsController < ApplicationController
     before_action :set_organization, only: [ :show, :update, :destroy ]
 
     def index
-        @organizations = Organization.all
+        @organizations = if current_user.super_admin?
+            Organization.all
+        else
+            Organization.where(id: current_user.organization_id)
+        end
         render json: { organizations: @organizations }
     end
     def show
@@ -25,21 +29,11 @@ class Api::V1::OrganizationsController < ApplicationController
         end
     end
     def destroy
-        ActiveRecord::Base.transaction do
-            # Delete all dependent records
-            @organization.users.destroy_all
-            @organization.locations.destroy_all
-            @organization.vehicles.destroy_all
-            @organization.products.destroy_all
-            @organization.orders.destroy_all
-            @organization.trips.destroy_all
-
-            # Finally delete the organization
-            @organization.destroy
+        if @organization.destroy
             head :no_content
+        else
+            render json: { errors: @organization.errors.full_messages }, status: :unprocessable_entity
         end
-    rescue => e
-        render json: { error: e.message }, status: :unprocessable_entity
     end
 
     private

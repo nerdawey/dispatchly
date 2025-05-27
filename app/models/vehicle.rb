@@ -2,7 +2,8 @@
 class Vehicle < ApplicationRecord
   belongs_to :organization
   belongs_to :current_location, class_name: "Location"
-  has_many :trips
+  has_many :trips, dependent: :destroy
+  has_many :assignments, dependent: :destroy
 
   validates :name, presence: true
   validates :plate_number, presence: true
