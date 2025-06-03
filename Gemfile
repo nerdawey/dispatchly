@@ -55,10 +55,12 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
   # CI/CD and Code Quality
-  gem 'rubocop', require: false
-  gem 'rubocop-rails', require: false
   gem 'rubocop-rspec', require: false
   gem 'bundler-audit', require: false
 end
 
 gem "database_cleaner-active_record", "~> 2.2"
+gem 'net-imap', '>= 0.5.7'
+gem 'nokogiri', '>= 1.18.8'
+gem 'rack', '>= 3.1.14'
+gem 'rack-session', '>= 2.1.1'
