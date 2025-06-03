@@ -13,9 +13,6 @@ module ActiveSupport
 
     # Add more helper methods to be used by all tests here...
     def setup_auth_headers(user)
-      # Ensure we have a valid secret key base in test environment
-      Rails.application.credentials.secret_key_base = SecureRandom.hex(64)
-
       # Create a token with the user's ID
       payload = { user_id: user.id }
       token = JsonWebToken.encode(payload)

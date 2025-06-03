@@ -50,4 +50,7 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Set a fixed secret_key_base for consistent JWT encoding/decoding in tests
+  config.secret_key_base = 'test_secret_key_base_1234567890'
 end
