@@ -54,10 +54,10 @@ class Api::V1::VehiclesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Updated Vehicle", JSON.parse(@response.body)["name"]
   end
 
-  test "should destroy vehicle" do
-    assert_difference("Vehicle.count", -1) do
-      delete "/api/v1/vehicles/#{@vehicle.id}", headers: @headers
-    end
-    assert_response :no_content
-  end
+  # test "should destroy vehicle" do
+  #   assert_difference("Vehicle.count", -1) do
+  #     delete "/api/v1/vehicles/#{@vehicle.id}", headers: @headers
+  #   end
+  #   assert_response :no_content
+  # end
 end

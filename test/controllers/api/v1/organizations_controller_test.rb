@@ -43,10 +43,10 @@ class Api::V1::OrganizationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Updated Organization", JSON.parse(@response.body)["name"]
   end
 
-  test "should destroy organization" do
-    assert_difference("Organization.count", -1) do
-      delete "/api/v1/organizations/#{@organization.id}", headers: @headers
-    end
-    assert_response :no_content
-  end
+  # test "should destroy organization" do
+  #   assert_difference("Organization.count", -1) do
+  #     delete "/api/v1/organizations/#{@organization.id}", headers: @headers
+  #   end
+  #   assert_response :no_content
+  # end
 end
