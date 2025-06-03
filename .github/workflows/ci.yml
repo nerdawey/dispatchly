@@ -96,10 +96,6 @@ jobs:
         ruby-version: '3.2.2'
         bundler-cache: true
 
-    - name: Build assets
-      run: |
-        bundle exec rails assets:precompile
-
     # Add your deployment steps here
     # For example, deploying to Heroku:
     # - name: Deploy to Heroku
