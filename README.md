@@ -100,17 +100,6 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 
 [MIT](LICENSE)
 
-## Business Documentation
-
-I'll analyze the project from a business perspective and create a business-focused documentation. Let me gather more information about the business logic and models.
-
-Ran tool
-Let me check some key business models to understand their relationships and business rules.
-
-Read file: app/models/organization.rb
-Read file: app/models/order.rb
-Based on my analysis, here's the business-focused documentation for Dispatchly:
-
 # Dispatchly - Business Documentation
 
 ## Business Overview
