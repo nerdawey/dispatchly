@@ -4,7 +4,11 @@ class Api::V1::LocationsController < ApplicationController
 
     # GET /api/v1/locations
     def index
+      if current_user.super_admin?
+        @locations = Location.all
+      else
       @locations = current_user.organization.locations
+      end
       render json: { locations: @locations }
     end
 
@@ -15,11 +19,16 @@ class Api::V1::LocationsController < ApplicationController
 
     # POST /api/v1/locations
     def create
-      @location = current_user.organization.locations.new(location_params)
+      @location = if current_user.super_admin?
+        Location.new(location_params)
+      else
+        current_user.organization.locations.build(location_params)
+      end
+
       if @location.save
         render json: @location, status: :created
       else
-        render json: { errors: @location.errors.full_messages }, status: :unprocessable_entity
+        render json: { errors: @location.errors }, status: :unprocessable_entity
       end
     end
 
@@ -28,30 +37,36 @@ class Api::V1::LocationsController < ApplicationController
       if @location.update(location_params)
         render json: @location
       else
-        render json: { errors: @location.errors.full_messages }, status: :unprocessable_entity
+        render json: { errors: @location.errors }, status: :unprocessable_entity
       end
     end
 
     # DELETE /api/v1/locations/:id
     def destroy
-      render json: { error: "Deleting locations is not allowed." }, status: :method_not_allowed
+      @location.destroy
+      head :no_content
     end
 
     private
 
     def set_location
-      @location = current_user.organization.locations.find(params[:id])
+      @location = if current_user.super_admin?
+        Location.find(params[:id])
+      else
+        current_user.organization.locations.find(params[:id])
+      end
     rescue ActiveRecord::RecordNotFound
       render json: { error: "Location not found" }, status: :not_found
     end
 
     def location_params
-      params.expect(
-        location: [ :name,
+      params.require(:location).permit(
+        :name,
         :address,
+        :city,
         :latitude,
         :longitude,
-        :organization_id ]
+        :location_type
       )
     end
 end

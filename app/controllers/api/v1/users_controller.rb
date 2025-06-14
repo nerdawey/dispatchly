@@ -3,8 +3,12 @@ class Api::V1::UsersController < ApplicationController
   before_action :set_user, only: [ :show, :update, :destroy ]
 
   def index
-    @users = current_user.organization.users
-    render json: { users: @users }
+    if current_user.super_admin?
+      @users = User.all
+    else
+      @users = current_user.organization.users
+    end
+    render json: { users: @users.as_json(include: { organization: { only: [:id, :name] } }) }
   end
 
   def show
@@ -12,7 +16,21 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def create
-    @user = current_user.organization.users.new(user_params)
+    # Prevent non-super_admins from creating a super_admin
+    if params[:user][:role] == "super_admin" && !current_user.super_admin?
+      return render json: { error: "Only super admins can create super admins." }, status: :forbidden
+    end
+
+    if params[:user][:role] == "super_admin"
+      @user = User.new(user_params)
+    elsif current_user.super_admin?
+      # If super admin is creating a user, use the organization_id from params
+      organization = Organization.find(params[:user][:organization_id])
+      @user = organization.users.new(user_params)
+    else
+      @user = current_user.organization.users.new(user_params)
+    end
+
     if @user.save
       render json: @user, status: :created
     else
@@ -42,6 +60,6 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def user_params
-    params.expect(user: [ :email_address, :password, :role, :organization_id ])
+    params.require(:user).permit(:name, :email_address, :password, :role, :organization_id)
   end
 end

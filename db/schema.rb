@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_27_100000) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_13_212854) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,16 +27,28 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_27_100000) do
     t.index ["vehicle_id"], name: "index_assignments_on_vehicle_id"
   end
 
+  create_table "failed_dispatches", force: :cascade do |t|
+    t.text "reason"
+    t.datetime "attempted_at"
+    t.bigint "organization_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_failed_dispatches_on_organization_id"
+  end
+
   create_table "locations", force: :cascade do |t|
     t.string "name"
     t.string "address"
     t.decimal "latitude"
     t.decimal "longitude"
-    t.bigint "organization_id", null: false
+    t.bigint "organization_id"
     t.string "location_type"
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "city"
+    t.string "category"
+    t.index ["city"], name: "index_locations_on_city"
     t.index ["organization_id"], name: "index_locations_on_organization_id"
   end
 
@@ -62,33 +74,36 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_27_100000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "order_type"
+    t.decimal "total_weight", precision: 10, scale: 2
+    t.bigint "trip_id"
     t.index ["delivery_location_id"], name: "index_orders_on_delivery_location_id"
     t.index ["organization_id"], name: "index_orders_on_organization_id"
     t.index ["pickup_location_id"], name: "index_orders_on_pickup_location_id"
+    t.index ["trip_id"], name: "index_orders_on_trip_id"
   end
 
   create_table "organizations", force: :cascade do |t|
     t.string "name"
-    t.string "address"
     t.string "contact_email"
     t.string "contact_phone"
-    t.string "subscription_tier"
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "products", force: :cascade do |t|
-    t.string "name"
     t.string "sku"
     t.decimal "weight"
-    t.decimal "volume"
-    t.integer "required_temperature", null: false
+    t.integer "required_temperature"
     t.bigint "organization_id", null: false
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "storage_temperature", default: 0, null: false
+    t.decimal "length"
+    t.decimal "width"
+    t.decimal "height"
+    t.integer "number_of_boxes"
     t.index ["organization_id"], name: "index_products_on_organization_id"
     t.index ["sku", "organization_id"], name: "index_products_on_sku_and_organization_id", unique: true
   end
@@ -123,40 +138,42 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_27_100000) do
     t.datetime "updated_at", null: false
     t.integer "role"
     t.bigint "organization_id"
+    t.string "name"
+    t.datetime "last_login_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["organization_id"], name: "index_users_on_organization_id"
   end
 
   create_table "vehicles", force: :cascade do |t|
-    t.string "name"
     t.string "plate_number"
     t.decimal "capacity_volume"
     t.decimal "capacity_weight"
-    t.integer "min_temp"
-    t.integer "max_temp"
     t.bigint "organization_id", null: false
-    t.bigint "current_location_id"
     t.string "status"
-    t.decimal "cost_per_km"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["current_location_id"], name: "index_vehicles_on_current_location_id"
+    t.string "model"
+    t.integer "year"
+    t.string "box_type"
+    t.date "last_maintenance_date"
+    t.boolean "freezing_available", default: false
     t.index ["organization_id"], name: "index_vehicles_on_organization_id"
   end
 
   add_foreign_key "assignments", "trips"
   add_foreign_key "assignments", "vehicles"
+  add_foreign_key "failed_dispatches", "organizations"
   add_foreign_key "locations", "organizations", on_delete: :cascade
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "locations", column: "delivery_location_id"
   add_foreign_key "orders", "locations", column: "pickup_location_id"
   add_foreign_key "orders", "organizations", on_delete: :cascade
+  add_foreign_key "orders", "trips"
   add_foreign_key "products", "organizations", on_delete: :cascade
   add_foreign_key "sessions", "users"
   add_foreign_key "trips", "organizations", on_delete: :cascade
   add_foreign_key "trips", "vehicles"
   add_foreign_key "users", "organizations", on_delete: :cascade
-  add_foreign_key "vehicles", "locations", column: "current_location_id"
   add_foreign_key "vehicles", "organizations", on_delete: :cascade
 end

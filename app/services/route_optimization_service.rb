@@ -8,7 +8,7 @@ class RouteOptimizationService
       return orders if orders.size <= 1
 
       orders.sort_by do |order|
-        [ order.deadline, order.dropoff_location.latitude, order.dropoff_location.longitude ]
+        [ order.delivery_deadline, order.delivery_location.latitude, order.delivery_location.longitude ]
       end
     end
 

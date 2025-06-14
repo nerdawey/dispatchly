@@ -3,12 +3,16 @@ class Api::V1::ProductsController < ApplicationController
 
     # GET /api/v1/products
     def index
-      @products = current_user.organization.products
+      if current_user.super_admin?
+        @products = Product.all
+      else
+        @products = current_user.organization.products
+      end
       if Rails.env.test?
         Rails.logger.debug { "[CONTROLLER DEBUG] index - current_user: #{current_user.id}, org_id: #{current_user.organization_id}" }
       end
       authorize! :read, Product
-      render json: { products: @products }
+      render json: { products: @products.as_json(include: { organization: { only: [:id, :name] } }) }
     end
 
     # GET /api/v1/products/:id
@@ -23,7 +27,14 @@ class Api::V1::ProductsController < ApplicationController
     # POST /api/v1/products
     def create
       authorize! :create, Product
+      if current_user.super_admin?
+        @product = Product.new(product_params)
+        unless @product.organization_id.present?
+          return render json: { errors: ["Organization is required for super admin"] }, status: :unprocessable_entity
+        end
+      else
       @product = current_user.organization.products.new(product_params)
+      end
       if Rails.env.test?
         Rails.logger.debug { "[CONTROLLER DEBUG] create - current_user: #{current_user.id}, org_id: #{current_user.organization_id}, product_org_id: #{@product.organization_id}" }
       end
@@ -71,14 +82,29 @@ class Api::V1::ProductsController < ApplicationController
     end
 
     def product_params
-      params.expect(
-        product: [ :name,
-        :description,
-        :weight,
-        :volume,
-        :storage_temperature,
-        :required_temperature,
-        :sku ]
+      if current_user.super_admin?
+        params.require(:product).permit(
+          :sku,
+          :weight,
+          :storage_temperature,
+          :required_temperature,
+          :length,
+          :width,
+          :height,
+          :number_of_boxes,
+          :organization_id
+        )
+      else
+        params.require(:product).permit(
+          :sku,
+          :weight,
+          :storage_temperature,
+          :required_temperature,
+          :length,
+          :width,
+          :height,
+          :number_of_boxes
       )
+      end
     end
 end

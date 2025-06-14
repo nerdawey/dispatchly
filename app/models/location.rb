@@ -1,5 +1,5 @@
 class Location < ApplicationRecord
-  belongs_to :organization
+  belongs_to :organization, optional: true
   
   geocoded_by :address
   after_validation :geocode, if: :should_geocode?
@@ -12,6 +12,10 @@ class Location < ApplicationRecord
 
   validates :name, presence: true
   validates :address, presence: true
+  validates :latitude, presence: true, numericality: true
+  validates :longitude, presence: true, numericality: true
+  validates :location_type, presence: true, inclusion: { in: %w[warehouse market] }
+  validates :city, presence: true
 
   before_destroy :nullify_vehicle_locations
 

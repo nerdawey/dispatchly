@@ -4,19 +4,16 @@ class Api::V1::TripsController < ApplicationController
     
     # GET /api/v1/trip
     def index
-      @trips = current_user.organization.trips
-        .includes(:vehicle, :orders)
-        .order(created_at: :desc)
-        .page(params[:page])
-        .per(params[:per_page])
+      if current_user.super_admin?
+        @trips = Trip.all.includes(:vehicle, :orders).order(created_at: :desc)
+      else
+        @trips = current_user.organization.trips
+          .includes(:vehicle, :orders)
+          .order(created_at: :desc)
+      end
 
       render json: {
-        trips: @trips.as_json(include: [:vehicle, :orders]),
-        meta: {
-          total_pages: @trips.total_pages,
-          current_page: @trips.current_page,
-          total_count: @trips.total_count
-        }
+        trips: @trips.as_json(include: [:vehicle, :orders])
       }
     end
     
@@ -44,14 +41,15 @@ class Api::V1::TripsController < ApplicationController
 
       begin
         # Get orders to dispatch
-        orders = Order.where(id: params[:order_ids])
+        order_ids = params[:order_ids] || []
+        orders = current_user.organization.orders.where(id: order_ids)
         
         if orders.empty?
           return render json: { error: "No valid orders found" }, status: :not_found
         end
 
-        # Get available vehicles
-        available_vehicles = Vehicle.available
+        # Get available vehicles for the current organization
+        available_vehicles = current_user.organization.vehicles.available
 
         if available_vehicles.empty?
           return render json: { error: "No vehicles available" }, status: :unprocessable_entity
@@ -87,7 +85,9 @@ class Api::V1::TripsController < ApplicationController
           message: "Trips created successfully",
           trips: trips.as_json(include: [:vehicle, :orders])
         }, status: :created
-      rescue DispatchAlgorithmService::NoVehiclesAvailableError => e
+      rescue StandardError => e
+        Rails.logger.error("Trip creation failed: #{e.message}")
+        
         # Create failed dispatch record
         failed_dispatch = FailedDispatch.create!(
           orders: orders,
@@ -102,9 +102,6 @@ class Api::V1::TripsController < ApplicationController
           error: e.message,
           failed_dispatch_id: failed_dispatch.id
         }, status: :unprocessable_entity
-      rescue StandardError => e
-        Rails.logger.error("Trip creation failed: #{e.message}")
-        render json: { error: "Failed to create trips" }, status: :internal_server_error
       end
     end
     
@@ -203,12 +200,12 @@ class Api::V1::TripsController < ApplicationController
     end
     
     def trip_params
-      params.expect(
-        trip: [:name,
+      params.require(:trip).permit(
+        :name,
         :vehicle_id,
         :status,
         :scheduled_date,
-        order_ids: []]
+        order_ids: []
       )
     end
   end

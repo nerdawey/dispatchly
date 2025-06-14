@@ -4,11 +4,11 @@ class Trip < ApplicationRecord
   belongs_to :organization
   has_many :orders, dependent: :destroy
 
-  validates :name, presence: true
   validates :status, presence: true
-  validates :scheduled_date, presence: true
-  validates :start_time, presence: true
-  validates :end_time, presence: true
+  validates :name, presence: true, on: :update
+  validates :scheduled_date, presence: true, on: :update
+  validates :start_time, presence: true, on: :update
+  validates :end_time, presence: true, on: :update
 
   def can_include_order?(order)
     same_temp = orders.all? { |o| o.product.storage_temperature == order.product.storage_temperature }

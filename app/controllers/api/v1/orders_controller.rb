@@ -3,12 +3,27 @@ class Api::V1::OrdersController < ApplicationController
   before_action :set_order, only: [ :show, :update, :destroy ]
 
   def index
-    @orders = current_user.organization.orders
-      .includes(:order_items, :pickup_location, :delivery_location)
-      .order(created_at: :desc)
+    if params[:trip_id]
+      @orders = current_user.organization.orders
+        .where(trip_id: params[:trip_id])
+        .includes(order_items: :product, pickup_location: {}, delivery_location: {})
+        .order(created_at: :desc)
+    elsif current_user.super_admin?
+      @orders = Order.all.includes(order_items: :product, pickup_location: {}, delivery_location: {}).order(created_at: :desc)
+    else
+      @orders = current_user.organization.orders
+        .includes(order_items: :product, pickup_location: {}, delivery_location: {})
+        .order(created_at: :desc)
+    end
 
     render json: {
-      orders: @orders.as_json(include: [ :order_items, :pickup_location, :delivery_location ])
+      orders: @orders.as_json(
+        include: [
+          { order_items: { include: :product } },
+          :pickup_location,
+          :delivery_location
+        ]
+      )
     }
   end
 
@@ -19,14 +34,28 @@ class Api::V1::OrdersController < ApplicationController
   def create
     ActiveRecord::Base.transaction do
       @order = Order.new(order_params)
+      @order.order_number = params[:order][:order_number]
 
       if @order.save
+        total_weight = 0
         params[:order_items]&.each do |item|
           @order.order_items.create!(
             product_id: item[:product_id],
             quantity: item[:quantity]
           )
+
+          product = Product.find(item[:product_id])
+          item_weight = product.weight * item[:quantity]
+          total_weight += item_weight
+
+          new_quantity = product.number_of_boxes - item[:quantity]
+          if new_quantity < 0
+            raise "Not enough boxes available for product #{product.sku}"
+          end
+          product.update!(number_of_boxes: new_quantity)
         end
+
+        @order.update!(total_weight: total_weight)
 
         render json: @order.as_json(include: :order_items), status: :created
       else

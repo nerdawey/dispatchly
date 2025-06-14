@@ -23,6 +23,7 @@ class DispatchAlgorithmService
       handle_no_vehicles_available
     rescue StandardError => e
       Rails.logger.error("Dispatch failed: #{e.message}")
+      Rails.logger.error(e.backtrace.join("\n"))
       raise DispatchError, "Failed to process dispatch: #{e.message}"
     end
   end
@@ -32,29 +33,45 @@ class DispatchAlgorithmService
   attr_reader :orders, :vehicles, :max_retries, :retry_count, :dispatch_id
 
   def process_dispatch
+    Rails.logger.info("Starting dispatch process with #{orders.size} orders and #{vehicles.size} vehicles")
+    
     # Cache orders for faster access
     RedisService.cache_order_cluster(orders)
 
     clustered_orders = OrderClusteringService.new(orders).cluster_orders
-    assignments = VehicleAssignmentService.new(vehicles, clustered_orders).assign
+    Rails.logger.info("Orders clustered into #{clustered_orders.size} clusters")
+    
+    result = VehicleAssignmentService.new(vehicles, clustered_orders).assign
+    Rails.logger.info("Vehicle assignment result: #{result.inspect}")
 
-    if assignments.empty?
+    if result[:assignments].empty?
       raise NoVehiclesAvailableError, "No suitable vehicles available for the orders"
     end
 
-    assignments.map do |assignment|
-      optimized_orders = RouteOptimizationService.new(assignment[:orders]).optimize
-      trip = create_trip(assignment[:vehicle], optimized_orders)
+    result[:assignments].map do |assignment|
+      Rails.logger.info("Processing assignment for vehicle #{assignment[:vehicle].id} with #{assignment[:orders].size} orders")
       
-      # Track active trip in Redis
-      RedisService.track_active_trip(trip.id, {
-        vehicle_id: assignment[:vehicle].id,
-        order_ids: optimized_orders.map(&:id),
-        status: 'active',
-        created_at: Time.current
-      })
+      optimized_orders = RouteOptimizationService.new(assignment[:orders]).optimize
+      Rails.logger.info("Orders optimized for vehicle #{assignment[:vehicle].id}")
+      
+      begin
+        trip = create_trip(assignment[:vehicle], optimized_orders)
+        Rails.logger.info("Created trip #{trip.id} for vehicle #{assignment[:vehicle].id}")
+        
+        # Track active trip in Redis
+        RedisService.track_active_trip(trip.id, {
+          vehicle_id: assignment[:vehicle].id,
+          order_ids: optimized_orders.map(&:id),
+          status: 'active',
+          created_at: Time.current
+        })
 
-      trip
+        trip
+      rescue => e
+        Rails.logger.error("Failed to create trip: #{e.message}")
+        Rails.logger.error(e.backtrace.join("\n"))
+        raise
+      end
     end
   end
 
@@ -77,12 +94,12 @@ class DispatchAlgorithmService
       ).cluster_orders
       
       # Try assignment again with reclustered orders
-      assignments = VehicleAssignmentService.new(vehicles, reclustered_orders).assign
+      result = VehicleAssignmentService.new(vehicles, reclustered_orders).assign
       
-      if assignments.empty?
+      if result[:assignments].empty?
         handle_no_vehicles_available
       else
-        assignments.map do |assignment|
+        result[:assignments].map do |assignment|
           optimized_orders = RouteOptimizationService.new(assignment[:orders]).optimize
           trip = create_trip(assignment[:vehicle], optimized_orders)
           
@@ -127,12 +144,20 @@ class DispatchAlgorithmService
   end
 
   def create_trip(vehicle, orders)
+    Rails.logger.info("Creating trip for vehicle #{vehicle.id} with #{orders.size} orders")
+    Rails.logger.info("Vehicle organization: #{vehicle.organization.inspect}")
+    
+    scheduled_date = orders.map(&:delivery_deadline).compact.min
     trip = Trip.create!(
       vehicle: vehicle,
+      organization: vehicle.organization,
       status: 'assigned',
-      assigned_at: Time.current
+      scheduled_date: scheduled_date
     )
+    
+    Rails.logger.info("Created trip #{trip.id}, updating orders")
     orders.each { |order| order.update!(trip: trip) }
+    
     trip
   end
 end
