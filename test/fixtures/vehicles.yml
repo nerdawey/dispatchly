@@ -1,15 +1,25 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: Test Vehicle 1
   organization_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
   capacity_volume: 1000
   capacity_weight: 2000
-  current_location_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  plate_number: ABC123
+  status: active
+  model: Toyota Hiace
+  year: 2020
+  box_type: closed
+  last_maintenance_date: <%= Date.current %>
+  freezing_available: true
 
 two:
-  name: Test Vehicle 2
   organization_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
   capacity_volume: 1500
   capacity_weight: 3000
-  current_location_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  plate_number: XYZ789
+  status: active
+  model: Mercedes Sprinter
+  year: 2021
+  box_type: closed
+  last_maintenance_date: <%= Date.current %>
+  freezing_available: false

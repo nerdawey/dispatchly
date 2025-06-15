@@ -6,9 +6,10 @@ Rails.application.routes.draw do
       post 'auth/login', to: 'authentication#login'
       
       # Trips (includes dispatch functionality)
-      resources :trips do
+      resources :trips, only: [:index, :show, :create, :update, :destroy] do
         collection do
-          post :create  # This handles dispatch creation
+          post :propose
+          post :confirm
         end
         member do
           post :optimize
@@ -32,6 +33,7 @@ Rails.application.routes.draw do
       resources :orders do
         collection do
           post :bulk_create
+          post :import_csv
         end
       end
 

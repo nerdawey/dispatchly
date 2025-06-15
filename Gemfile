@@ -57,6 +57,9 @@ group :development, :test do
   # CI/CD and Code Quality
   gem 'rubocop-rspec', require: false
   gem 'bundler-audit', require: false
+  gem 'rails-erd'
+  gem 'railroady'
+  gem 'plantuml_builder'
 end
 
 gem "database_cleaner-active_record", "~> 2.2"

@@ -107,7 +107,11 @@ class Api::V1::TripsController < ApplicationController
     
     # PUT /api/v1/trip/:id
     def update
-      if @trip.update(trip_params)
+      status_changing_to_completed = trip_params[:status].to_s.in?(["completed", "ended"])
+      filtered_params = trip_params.except(:end_time)
+      @trip.assign_attributes(filtered_params)
+      @trip.end_time = Time.current if status_changing_to_completed
+      if @trip.save
         # Update Redis cache
         RedisService.track_active_trip(@trip.id, {
           vehicle_id: @trip.vehicle_id,
@@ -115,9 +119,9 @@ class Api::V1::TripsController < ApplicationController
           status: @trip.status,
           updated_at: Time.current
         })
-
         render json: @trip
       else
+        Rails.logger.error "Trip update failed: #{@trip.errors.full_messages.join(', ')}"
         render json: { errors: @trip.errors }, status: :unprocessable_entity
       end
     end
@@ -190,6 +194,140 @@ class Api::V1::TripsController < ApplicationController
         render json: { errors: @trip.errors }, status: :unprocessable_entity
       end
     end
+
+    # POST /api/v1/trips/propose
+    def propose
+      # Get orders from params
+      order_ids = params[:order_ids]
+      orders = current_user.organization.orders.where(id: order_ids)
+
+      # Use the actual dispatch algorithm service
+      available_vehicles = current_user.organization.vehicles.available
+      result = DispatchAlgorithmService.new(orders, available_vehicles).call
+
+      # Serialize trips for the frontend without saving to DB
+      trips_json = result.map.with_index do |assignment, index|
+        {
+          id: index + 1, # Temporary ID for frontend reference
+          vehicle_id: assignment[:vehicle].id,
+          vehicle: { 
+            id: assignment[:vehicle].id,
+            plate_number: assignment[:vehicle].plate_number 
+          },
+          order_ids: assignment[:orders].map(&:id),
+          orders: assignment[:orders].map do |order|
+            {
+              id: order.id,
+              order_number: order.order_number,
+              total_weight: order.total_weight,
+              products: order.order_items.map do |item|
+                {
+                  id: item.product.id,
+                  sku: item.product.sku,
+                  quantity: item.quantity
+                }
+              end
+            }
+          end,
+          total_weight: assignment[:orders].sum(&:total_weight),
+          total_distance: assignment[:total_distance],
+          estimated_duration: assignment[:estimated_duration]
+        }
+      end
+
+      # Store in Redis
+      redis_key = RedisService.store_proposed_trips(current_user.id, {
+        trips: trips_json,
+        order_ids: order_ids,
+        created_at: Time.current
+      })
+
+      render json: {
+        proposed_trips: trips_json,
+        redis_key: redis_key
+      }
+    rescue => e
+      Rails.logger.error "Error in propose action: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    # POST /api/v1/trips/confirm
+    def confirm
+      # Get proposed trips from Redis
+      proposed_data = RedisService.get_proposed_trips(current_user.id)
+      return render json: { error: 'No proposed trips found' }, status: :not_found unless proposed_data
+
+      # Get confirmed trip IDs from params
+      confirmed_trip_ids = params[:confirmed_trip_ids]
+      return render json: { error: 'No trips selected for confirmation' }, status: :bad_request if confirmed_trip_ids.blank?
+
+      # Filter trips to only include confirmed ones
+      trips_to_save = proposed_data['trips'].select { |trip| confirmed_trip_ids.include?(trip['id']) }
+
+      # Save confirmed trips to database
+      saved_trips = []
+      errors = []
+      updated_orders = []
+
+      ActiveRecord::Base.transaction do
+        trips_to_save.each do |trip_data|
+          begin
+            # Create the trip
+            trip = current_user.organization.trips.create!(
+              vehicle_id: trip_data['vehicle_id'],
+              status: 'pending',
+              scheduled_date: Date.current,
+              name: trip_data['name'] || "Trip ##{SecureRandom.hex(4)}",
+              start_time: Time.current,
+              end_time: nil
+            )
+
+            trip_data['order_ids'].each do |order_id|
+              begin
+                order = current_user.organization.orders.find(order_id)
+                Rails.logger.info "[CONFIRM] Updating Order #{order.id}: current status=#{order.status}, trip_id=#{order.trip_id}"
+                order.update!(
+                  trip_id: trip.id,
+                  status: 'dispatched'
+                )
+                Rails.logger.info "[CONFIRM] Order #{order.id} updated! New status=#{order.status}, trip_id=#{order.trip_id}"
+                updated_orders << { id: order.id, status: order.status, trip_id: order.trip_id }
+              rescue => order_error
+                Rails.logger.error "[CONFIRM] Failed to update Order #{order_id}: #{order_error.message}"
+                Rails.logger.error order_error.backtrace.join("\n")
+                errors << { order_id: order_id, error: order_error.message, full_messages: (order.respond_to?(:errors) ? order.errors.full_messages : []) }
+                raise ActiveRecord::Rollback
+              end
+            end
+
+            saved_trips << trip
+          rescue => e
+            Rails.logger.error "[CONFIRM] Failed to create trip for vehicle #{trip_data['vehicle_id']}: #{e.message}"
+            Rails.logger.error e.backtrace.join("\n")
+            errors << { trip_id: trip_data['id'], error: e.message }
+            raise ActiveRecord::Rollback
+          end
+        end
+      end
+
+      # Clear Redis data
+      RedisService.clear_proposed_trips(current_user.id)
+
+      if errors.any?
+        render json: {
+          saved_trips: saved_trips,
+          updated_orders: updated_orders,
+          errors: errors
+        }, status: :partial_content
+      else
+        render json: { 
+          message: "Trips confirmed successfully",
+          trips: saved_trips.as_json(include: [:vehicle, :orders]),
+          updated_orders: updated_orders
+        }, status: :created
+      end
+    end
     
     private
     
@@ -205,6 +343,8 @@ class Api::V1::TripsController < ApplicationController
         :vehicle_id,
         :status,
         :scheduled_date,
+        :start_time,
+        :end_time,
         order_ids: []
       )
     end

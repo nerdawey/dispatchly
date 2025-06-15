@@ -40,31 +40,40 @@ class Api::V1::ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_difference("Product.count") do
       post "/api/v1/products", headers: @headers, params: {
         product: {
-          name: "New Product",
           sku: "NEW-001",
           weight: 1.5,
-          volume: 2.0,
-          required_temperature: 4.0,
-          storage_temperature: "chilled"
+          required_temperature: -18.0,
+          storage_temperature: "frozen",
+          organization_id: @user.organization_id,
+          number_of_boxes: 100
         }
       }
     end
     assert_response :created
     response_data = JSON.parse(@response.body)
-    assert_equal "New Product", response_data["name"]
     assert_equal "NEW-001", response_data["sku"]
     assert_equal @user.organization_id, response_data["organization_id"]
+    assert_equal -18.0, response_data["required_temperature"]
+    assert_equal "frozen", response_data["storage_temperature"]
   end
 
   test "should update product" do
     patch "/api/v1/products/#{@product.id}", headers: @headers, params: {
-      product: { name: "Updated Product" }
+      product: {
+        sku: "UPD-001",
+        required_temperature: -18.0,
+        storage_temperature: "frozen"
+      }
     }
     assert_response :success
     response_data = JSON.parse(@response.body)
-    assert_equal "Updated Product", response_data["name"]
+    assert_equal "UPD-001", response_data["sku"]
+    assert_equal -18.0, response_data["required_temperature"]
+    assert_equal "frozen", response_data["storage_temperature"]
     @product.reload
-    assert_equal "Updated Product", @product.name
+    assert_equal "UPD-001", @product.sku
+    assert_equal -18.0, @product.required_temperature
+    assert_equal "frozen", @product.storage_temperature
   end
 
   test "should destroy product" do

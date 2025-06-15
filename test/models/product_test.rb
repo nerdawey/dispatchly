@@ -5,44 +5,24 @@ class ProductTest < ActiveSupport::TestCase
     organization = organizations(:one)
 
     product = Product.new(
-      name: "Test Product",
       sku: "TEST-#{Time.current.to_i}",
       weight: 1.5,
-      volume: 2.0,
-      required_temperature: 4.0,
       organization: organization,
-      storage_temperature: "chilled"
+      storage_temperature: "frozen",
+      number_of_boxes: 100
     )
     puts product.errors.full_messages unless product.valid?
     assert product.valid?
-  end
-
-  test "invalid without name" do
-    organization = organizations(:one)
-
-    product = Product.new(
-      sku: "TEST-#{Time.current.to_i}",
-      weight: 1.5,
-      volume: 2.0,
-      required_temperature: 4.0,
-      organization: organization,
-      storage_temperature: "chilled"
-    )
-    puts product.errors.full_messages unless product.valid?
-    assert_not product.valid?
-    assert_includes product.errors[:name], "can't be blank"
   end
 
   test "invalid without sku" do
     organization = organizations(:one)
 
     product = Product.new(
-      name: "Test Product",
       weight: 1.5,
-      volume: 2.0,
-      required_temperature: 4.0,
       organization: organization,
-      storage_temperature: "chilled"
+      storage_temperature: "frozen",
+      number_of_boxes: 100
     )
     puts product.errors.full_messages unless product.valid?
     assert_not product.valid?
@@ -53,58 +33,22 @@ class ProductTest < ActiveSupport::TestCase
     organization = organizations(:one)
 
     product = Product.new(
-      name: "Test Product",
       sku: "TEST-#{Time.current.to_i}",
-      volume: 2.0,
-      required_temperature: 4.0,
       organization: organization,
-      storage_temperature: "chilled"
+      storage_temperature: "frozen",
+      number_of_boxes: 100
     )
     puts product.errors.full_messages unless product.valid?
     assert_not product.valid?
     assert_includes product.errors[:weight], "can't be blank"
   end
 
-  test "invalid without volume" do
-    organization = organizations(:one)
-
-    product = Product.new(
-      name: "Test Product",
-      sku: "TEST-#{Time.current.to_i}",
-      weight: 1.5,
-      required_temperature: 4.0,
-      organization: organization,
-      storage_temperature: "chilled"
-    )
-    puts product.errors.full_messages unless product.valid?
-    assert_not product.valid?
-    assert_includes product.errors[:volume], "can't be blank"
-  end
-
-  test "invalid without required_temperature" do
-    organization = organizations(:one)
-
-    product = Product.new(
-      name: "Test Product",
-      sku: "TEST-#{Time.current.to_i}",
-      weight: 1.5,
-      volume: 2.0,
-      organization: organization,
-      storage_temperature: "chilled"
-    )
-    puts product.errors.full_messages unless product.valid?
-    assert_not product.valid?
-    assert_includes product.errors[:required_temperature], "can't be blank"
-  end
-
   test "invalid without organization" do
     product = Product.new(
-      name: "Test Product",
       sku: "TEST-#{Time.current.to_i}",
       weight: 1.5,
-      volume: 2.0,
-      required_temperature: 4.0,
-      storage_temperature: "chilled"
+      storage_temperature: "frozen",
+      number_of_boxes: 100
     )
     puts product.errors.full_messages unless product.valid?
     assert_not product.valid?
@@ -116,52 +60,103 @@ class ProductTest < ActiveSupport::TestCase
 
     # Test ambient
     product = Product.new(
-      name: "Ambient Product",
       sku: "TEST-#{Time.current.to_i}",
       weight: 1.5,
-      volume: 2.0,
-      required_temperature: 4.0,
       organization: organization,
-      storage_temperature: "ambient"
+      storage_temperature: "ambient",
+      number_of_boxes: 100
     )
     assert product.valid?
 
     # Test chilled
     product = Product.new(
-      name: "Chilled Product",
       sku: "TEST-#{Time.current.to_i}",
       weight: 1.5,
-      volume: 2.0,
-      required_temperature: 4.0,
       organization: organization,
-      storage_temperature: "chilled"
+      storage_temperature: "chilled",
+      number_of_boxes: 100
     )
     assert product.valid?
 
     # Test frozen
     product = Product.new(
-      name: "Frozen Product",
       sku: "TEST-#{Time.current.to_i}",
       weight: 1.5,
-      volume: 2.0,
-      required_temperature: 4.0,
       organization: organization,
-      storage_temperature: "frozen"
+      storage_temperature: "frozen",
+      number_of_boxes: 100
     )
     assert product.valid?
 
     # Test invalid value
     assert_raises(ArgumentError) do
       Product.new(
-        name: "Invalid Product",
         sku: "TEST-#{Time.current.to_i}",
         weight: 1.5,
-        volume: 2.0,
-        required_temperature: 4.0,
         organization: organization,
-        storage_temperature: "invalid"
+        storage_temperature: "invalid",
+        number_of_boxes: 100
       )
     end
+  end
+
+  test "invalid weight values" do
+    organization = organizations(:one)
+
+    # Test zero weight
+    product = Product.new(
+      sku: "TEST-#{Time.current.to_i}",
+      weight: 0,
+      organization: organization,
+      storage_temperature: "frozen",
+      number_of_boxes: 100
+    )
+    assert_not product.valid?
+    assert_includes product.errors[:weight], "must be greater than 0"
+
+    # Test negative weight
+    product = Product.new(
+      sku: "TEST-#{Time.current.to_i}",
+      weight: -1.5,
+      organization: organization,
+      storage_temperature: "frozen",
+      number_of_boxes: 100
+    )
+    assert_not product.valid?
+    assert_includes product.errors[:weight], "must be greater than 0"
+  end
+
+  test "optional dimensions" do
+    organization = organizations(:one)
+
+    # Test valid dimensions
+    product = Product.new(
+      sku: "TEST-#{Time.current.to_i}",
+      weight: 1.5,
+      organization: organization,
+      storage_temperature: "frozen",
+      number_of_boxes: 100,
+      length: 10,
+      width: 5,
+      height: 2
+    )
+    assert product.valid?
+
+    # Test invalid dimensions
+    product = Product.new(
+      sku: "TEST-#{Time.current.to_i}",
+      weight: 1.5,
+      organization: organization,
+      storage_temperature: "frozen",
+      number_of_boxes: 100,
+      length: 0,
+      width: -1,
+      height: 0
+    )
+    assert_not product.valid?
+    assert_includes product.errors[:length], "must be greater than 0"
+    assert_includes product.errors[:width], "must be greater than 0"
+    assert_includes product.errors[:height], "must be greater than 0"
   end
 
   # test "the truth" do

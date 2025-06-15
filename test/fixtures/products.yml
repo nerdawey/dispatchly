@@ -1,19 +1,17 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: Test Product 1
   sku: TEST-001
   weight: 1.5
-  volume: 2.0
-  required_temperature: 4.0
+  required_temperature: 4
   organization_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
   storage_temperature: chilled
+  number_of_boxes: 100
 
 two:
-  name: Test Product 2
   sku: TEST-002
   weight: 2.5
-  volume: 3.0
-  required_temperature: -18.0
+  required_temperature: -18
   organization_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
   storage_temperature: frozen
+  number_of_boxes: 200

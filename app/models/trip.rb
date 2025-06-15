@@ -8,7 +8,7 @@ class Trip < ApplicationRecord
   validates :name, presence: true, on: :update
   validates :scheduled_date, presence: true, on: :update
   validates :start_time, presence: true, on: :update
-  validates :end_time, presence: true, on: :update
+  validates :end_time, presence: true, if: -> { status == 'completed' || status == 'ended' }
 
   def can_include_order?(order)
     same_temp = orders.all? { |o| o.product.storage_temperature == order.product.storage_temperature }

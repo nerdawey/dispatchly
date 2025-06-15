@@ -23,35 +23,57 @@ class Api::V1::VehiclesControllerTest < ActionDispatch::IntegrationTest
     assert_difference("Vehicle.count") do
       post "/api/v1/vehicles", headers: @headers, params: {
         vehicle: {
-          name: "New Vehicle",
           plate_number: "ABC123",
           capacity_volume: 100.0,
           capacity_weight: 1000.0,
-          min_temp: -10,
-          max_temp: 10,
           organization_id: @user.organization_id,
-          current_location_id: locations(:one).id,
           status: "active",
-          cost_per_km: 2.5
+          model: "Toyota Hiace",
+          year: 2020,
+          box_type: "closed",
+          last_maintenance_date: Date.current,
+          freezing_available: true
         }
       }
     end
     assert_response :created
+    response_data = JSON.parse(@response.body)
+    assert_equal "ABC123", response_data["plate_number"]
+    assert_equal @user.organization_id, response_data["organization_id"]
+    assert_equal "active", response_data["status"]
+    assert_equal "Toyota Hiace", response_data["model"]
+    assert_equal 2020, response_data["year"]
+    assert_equal "closed", response_data["box_type"]
+    assert_equal true, response_data["freezing_available"]
   end
 
   test "should update vehicle" do
     patch "/api/v1/vehicles/#{@vehicle.id}", headers: @headers, params: {
       vehicle: {
-        name: "Updated Vehicle",
         plate_number: "XYZ789",
-        min_temp: -5,
-        max_temp: 5,
         status: "active",
-        cost_per_km: 3.0
+        model: "Mercedes Sprinter",
+        year: 2021,
+        box_type: "closed",
+        last_maintenance_date: Date.current,
+        freezing_available: false
       }
     }
     assert_response :success
-    assert_equal "Updated Vehicle", JSON.parse(@response.body)["name"]
+    response_data = JSON.parse(@response.body)
+    assert_equal "XYZ789", response_data["plate_number"]
+    assert_equal "active", response_data["status"]
+    assert_equal "Mercedes Sprinter", response_data["model"]
+    assert_equal 2021, response_data["year"]
+    assert_equal "closed", response_data["box_type"]
+    assert_equal false, response_data["freezing_available"]
+    @vehicle.reload
+    assert_equal "XYZ789", @vehicle.plate_number
+    assert_equal "active", @vehicle.status
+    assert_equal "Mercedes Sprinter", @vehicle.model
+    assert_equal 2021, @vehicle.year
+    assert_equal "closed", @vehicle.box_type
+    assert_equal false, @vehicle.freezing_available
   end
 
   # test "should destroy vehicle" do

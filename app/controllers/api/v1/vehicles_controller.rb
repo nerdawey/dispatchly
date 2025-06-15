@@ -20,7 +20,6 @@ class Api::V1::VehiclesController < ApplicationController
     # POST /api/v1/vehicles
     def create
       @vehicle = current_user.organization.vehicles.new(vehicle_params)
-      @vehicle.status = 'active' # Set default status to active
       
       if @vehicle.save
         render json: @vehicle, status: :created

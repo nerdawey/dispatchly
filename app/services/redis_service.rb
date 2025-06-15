@@ -90,5 +90,58 @@ class RedisService
         redis.flushdb
       end
     end
+
+    # Store proposed trips in Redis
+    def store_proposed_trips(user_id, trips_data)
+      key = "proposed_trips:#{user_id}"
+      # Store with 30-minute expiration
+      REDIS_POOL.with do |redis|
+        redis.setex(key, 1800, trips_data.to_json)
+      end
+      key
+    end
+
+    # Get proposed trips from Redis
+    def get_proposed_trips(user_id)
+      key = "proposed_trips:#{user_id}"
+      REDIS_POOL.with do |redis|
+        data = redis.get(key)
+        data ? JSON.parse(data) : nil
+      end
+    end
+
+    # Clear proposed trips from Redis
+    def clear_proposed_trips(user_id)
+      key = "proposed_trips:#{user_id}"
+      REDIS_POOL.with do |redis|
+        redis.del(key)
+      end
+    end
+
+    # Store confirmed trip IDs
+    def store_confirmed_trips(user_id, trip_ids)
+      key = "confirmed_trips:#{user_id}"
+      REDIS_POOL.with do |redis|
+        redis.setex(key, 1800, trip_ids.to_json)
+      end
+      key
+    end
+
+    # Get confirmed trip IDs
+    def get_confirmed_trips(user_id)
+      key = "confirmed_trips:#{user_id}"
+      REDIS_POOL.with do |redis|
+        data = redis.get(key)
+        data ? JSON.parse(data) : nil
+      end
+    end
+
+    # Clear confirmed trips
+    def clear_confirmed_trips(user_id)
+      key = "confirmed_trips:#{user_id}"
+      REDIS_POOL.with do |redis|
+        redis.del(key)
+      end
+    end
   end
 end

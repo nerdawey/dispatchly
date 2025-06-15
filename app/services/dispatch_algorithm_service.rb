@@ -40,7 +40,7 @@ class DispatchAlgorithmService
 
     clustered_orders = OrderClusteringService.new(orders).cluster_orders
     Rails.logger.info("Orders clustered into #{clustered_orders.size} clusters")
-    
+
     result = VehicleAssignmentService.new(vehicles, clustered_orders).assign
     Rails.logger.info("Vehicle assignment result: #{result.inspect}")
 
@@ -48,31 +48,37 @@ class DispatchAlgorithmService
       raise NoVehiclesAvailableError, "No suitable vehicles available for the orders"
     end
 
+    # Instead of creating trips, just return the assignments with additional data
     result[:assignments].map do |assignment|
       Rails.logger.info("Processing assignment for vehicle #{assignment[:vehicle].id} with #{assignment[:orders].size} orders")
       
       optimized_orders = RouteOptimizationService.new(assignment[:orders]).optimize
       Rails.logger.info("Orders optimized for vehicle #{assignment[:vehicle].id}")
       
-      begin
-        trip = create_trip(assignment[:vehicle], optimized_orders)
-        Rails.logger.info("Created trip #{trip.id} for vehicle #{assignment[:vehicle].id}")
-        
-        # Track active trip in Redis
-        RedisService.track_active_trip(trip.id, {
-          vehicle_id: assignment[:vehicle].id,
-          order_ids: optimized_orders.map(&:id),
-          status: 'active',
-          created_at: Time.current
-        })
-
-        trip
-      rescue => e
-        Rails.logger.error("Failed to create trip: #{e.message}")
-        Rails.logger.error(e.backtrace.join("\n"))
-        raise
-      end
+      # Calculate total distance and estimated duration
+      total_distance = calculate_total_distance(optimized_orders)
+      estimated_duration = calculate_estimated_duration(total_distance)
+      
+      # Return assignment with additional data
+      {
+        vehicle: assignment[:vehicle],
+        orders: optimized_orders,
+        total_distance: total_distance,
+        estimated_duration: estimated_duration
+      }
     end
+  end
+
+  def calculate_total_distance(orders)
+    # Simple calculation based on number of orders and average distance
+    # This should be replaced with actual distance calculation
+    orders.size * 5.0 # 5km per order as a placeholder
+  end
+
+  def calculate_estimated_duration(distance)
+    # Simple calculation based on distance and average speed
+    # This should be replaced with actual duration calculation
+    (distance / 30.0).round(1) # 30 km/h average speed
   end
 
   def handle_no_vehicles_available

@@ -2,16 +2,12 @@
 
 one:
   name: Test Organization 1
-  address: 123 Test St
   contact_email: contact1@test.com
   contact_phone: "123-456-7890"
-  subscription_tier: standard
   status: active
 
 two:
   name: Test Organization 2
-  address: 456 Test Ave
   contact_email: contact2@test.com
   contact_phone: "098-765-4321"
-  subscription_tier: premium
   status: active
