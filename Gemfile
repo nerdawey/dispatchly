@@ -65,5 +65,5 @@ end
 gem "database_cleaner-active_record", "~> 2.2"
 gem 'net-imap', '>= 0.5.7'
 gem 'nokogiri', '>= 1.18.8'
-gem 'rack', '>= 3.1.14'
+gem 'rack', '>= 3.1.16'
 gem 'rack-session', '>= 2.1.1'
