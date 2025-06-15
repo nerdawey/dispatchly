@@ -1,7 +1,7 @@
 class Api::V1::OrdersController < ApplicationController
   load_and_authorize_resource
   before_action :set_order, only: [ :show, :update, :destroy ]
-  require 'csv'
+  require "csv"
 
   def index
     if params[:trip_id]
@@ -10,7 +10,7 @@ class Api::V1::OrdersController < ApplicationController
         .includes(order_items: :product, pickup_location: {}, delivery_location: {})
         .order(created_at: :desc)
     elsif current_user.super_admin?
-      @orders = Order.all.includes(order_items: :product, pickup_location: {}, delivery_location: {}).order(created_at: :desc)
+      @orders = Order.includes(order_items: :product, pickup_location: {}, delivery_location: {}).order(created_at: :desc)
     else
       @orders = current_user.organization.orders
         .includes(order_items: :product, pickup_location: {}, delivery_location: {})
@@ -117,7 +117,7 @@ class Api::V1::OrdersController < ApplicationController
   def import_csv
     file = params[:file]
     unless file && file.respond_to?(:read)
-      return render json: { error: 'No CSV file uploaded' }, status: :bad_request
+      return render json: { error: "No CSV file uploaded" }, status: :bad_request
     end
 
     file.rewind
@@ -131,35 +131,35 @@ class Api::V1::OrdersController < ApplicationController
     ActiveRecord::Base.transaction do
       validator.valid_orders.each do |order_data|
         # Map CSV fields to model fields
-        pickup_location = Location.find_by(name: order_data['pickup_location'])
-        delivery_location = Location.find_by(name: order_data['delivery_location'])
-        product = Product.find_by(sku: order_data['product_sku'])
+        pickup_location = Location.find_by(name: order_data["pickup_location"])
+        delivery_location = Location.find_by(name: order_data["delivery_location"])
+        product = Product.find_by(sku: order_data["product_sku"])
         if pickup_location.nil? || delivery_location.nil? || product.nil?
           raise ActiveRecord::Rollback, "Invalid location or product for order #{order_data['order_number']}"
         end
         Rails.logger.info "DEBUG: order_data = \\#{order_data.inspect}"
         order = Order.create!(
-          order_number: order_data['order_number'],
+          order_number: order_data["order_number"],
           organization: current_user.organization,
           pickup_location: pickup_location,
           delivery_location: delivery_location,
-          status: order_data['status'],
-          order_type: order_data['order_type'],
-          delivery_deadline: (order_data['delivery_deadline'].present? ? Date.parse(order_data['delivery_deadline']) : nil),
-          pickup_time_window_start: (order_data['pickup_time_window_start'].present? ? Time.parse(order_data['pickup_time_window_start']) : nil),
-          pickup_time_window_end: (order_data['pickup_time_window_end'].present? ? Time.parse(order_data['pickup_time_window_end']) : nil)
+          status: order_data["status"],
+          order_type: order_data["order_type"],
+          delivery_deadline: (order_data["delivery_deadline"].present? ? Date.parse(order_data["delivery_deadline"]) : nil),
+          pickup_time_window_start: (order_data["pickup_time_window_start"].present? ? Time.zone.parse(order_data["pickup_time_window_start"]) : nil),
+          pickup_time_window_end: (order_data["pickup_time_window_end"].present? ? Time.zone.parse(order_data["pickup_time_window_end"]) : nil)
         )
-        order_item = order.order_items.create!(product: product, quantity: order_data['quantity'].to_i)
+        order_item = order.order_items.create!(product: product, quantity: order_data["quantity"].to_i)
 
         # Update product quantity
-        new_quantity = product.number_of_boxes - order_data['quantity'].to_i
+        new_quantity = product.number_of_boxes - order_data["quantity"].to_i
         if new_quantity < 0
           raise "Not enough boxes available for product #{product.sku}"
         end
         product.update!(number_of_boxes: new_quantity)
 
         # Calculate and update total weight
-        total_weight = product.weight * order_data['quantity'].to_i
+        total_weight = product.weight * order_data["quantity"].to_i
         order.update!(total_weight: total_weight)
 
         created_orders << order

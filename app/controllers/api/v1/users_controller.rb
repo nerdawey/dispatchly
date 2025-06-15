@@ -8,7 +8,7 @@ class Api::V1::UsersController < ApplicationController
     else
       @users = current_user.organization.users
     end
-    render json: { users: @users.as_json(include: { organization: { only: [:id, :name] } }) }
+    render json: { users: @users.as_json(include: { organization: { only: [ :id, :name ] } }) }
   end
 
   def show
@@ -60,6 +60,6 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:name, :email_address, :password, :role, :organization_id)
+    params.expect(user: [ :name, :email_address, :password, :role, :organization_id ])
   end
 end

@@ -12,7 +12,7 @@ class Api::V1::ProductsController < ApplicationController
         Rails.logger.debug { "[CONTROLLER DEBUG] index - current_user: #{current_user.id}, org_id: #{current_user.organization_id}" }
       end
       authorize! :read, Product
-      render json: { products: @products.as_json(include: { organization: { only: [:id, :name] } }) }
+      render json: { products: @products.as_json(include: { organization: { only: [ :id, :name ] } }) }
     end
 
     # GET /api/v1/products/:id
@@ -29,8 +29,8 @@ class Api::V1::ProductsController < ApplicationController
       authorize! :create, Product
       if current_user.super_admin?
         @product = Product.new(product_params)
-        unless @product.organization_id.present?
-          return render json: { errors: ["Organization is required for super admin"] }, status: :unprocessable_entity
+        if @product.organization_id.blank?
+          return render json: { errors: [ "Organization is required for super admin" ] }, status: :unprocessable_entity
         end
       else
       @product = current_user.organization.products.new(product_params)
@@ -83,8 +83,8 @@ class Api::V1::ProductsController < ApplicationController
 
     def product_params
       if current_user.super_admin?
-        params.require(:product).permit(
-          :sku,
+        params.expect(
+          product: [ :sku,
           :weight,
           :storage_temperature,
           :required_temperature,
@@ -92,18 +92,18 @@ class Api::V1::ProductsController < ApplicationController
           :width,
           :height,
           :number_of_boxes,
-          :organization_id
+          :organization_id ]
         )
       else
-        params.require(:product).permit(
-          :sku,
+        params.expect(
+          product: [ :sku,
           :weight,
           :storage_temperature,
           :required_temperature,
           :length,
           :width,
           :height,
-          :number_of_boxes
+          :number_of_boxes ]
       )
       end
     end

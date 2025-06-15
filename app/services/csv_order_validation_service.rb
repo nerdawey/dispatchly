@@ -1,4 +1,4 @@
-require 'csv'
+require "csv"
 
 class CsvOrderValidationService
   REQUIRED_HEADERS = %w[order_number pickup_location delivery_location product_sku quantity status order_type delivery_deadline pickup_time_window_start pickup_time_window_end]
@@ -32,7 +32,7 @@ class CsvOrderValidationService
       end
 
       # Additional validations (example: quantity must be integer)
-      if order_data['quantity'] && order_data['quantity'].to_i.to_s != order_data['quantity']
+      if order_data["quantity"] && order_data["quantity"].to_i.to_s != order_data["quantity"]
         row_errors << "Row #{idx+2}: Quantity must be an integer"
       end
 
@@ -45,4 +45,4 @@ class CsvOrderValidationService
 
     @errors.empty?
   end
-end 
+end

@@ -37,11 +37,11 @@ class VehicleAssignmentService
       total_quantity = orders.sum { |order| order.order_items.sum(&:quantity) }
       total_weight = orders.sum(&:total_weight)
       requires_freezing = orders.any? do |order|
-        order.order_items.any? { |item| item.product.storage_temperature == 'frozen' }
+        order.order_items.any? { |item| item.product.storage_temperature == "frozen" }
       end
 
       vehicles.find do |vehicle|
-        !@assigned_vehicle_ids.include?(vehicle.id) && # Check if vehicle is already assigned
+        @assigned_vehicle_ids.exclude?(vehicle.id) && # Check if vehicle is already assigned
         vehicle.capacity_volume >= total_quantity &&
         vehicle.capacity_weight >= total_weight &&
         (!requires_freezing || vehicle.freezing_available)

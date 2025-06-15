@@ -60,13 +60,13 @@ class Api::V1::LocationsController < ApplicationController
     end
 
     def location_params
-      params.require(:location).permit(
-        :name,
+      params.expect(
+        location: [ :name,
         :address,
         :city,
         :latitude,
         :longitude,
-        :location_type
+        :location_type ]
       )
     end
 end

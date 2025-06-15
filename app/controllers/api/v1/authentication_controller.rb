@@ -1,9 +1,9 @@
 # app/controllers/api/v1/authentication_controller.rb
 class Api::V1::AuthenticationController < ApplicationController
-  skip_before_action :authenticate_request, only: [:login]
+  skip_before_action :authenticate_request, only: [ :login ]
   
   def login
-    user_params = params.require(:authentication).permit(:username, :password)
+    user_params = params.expect(authentication: [ :username, :password ])
     @user = User.find_by(email_address: user_params[:username])
   
     if @user&.authenticate(user_params[:password])

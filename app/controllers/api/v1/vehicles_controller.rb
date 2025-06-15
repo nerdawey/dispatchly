@@ -9,7 +9,7 @@ class Api::V1::VehiclesController < ApplicationController
       else
         @vehicles = current_user.organization.vehicles
       end
-      render json: { vehicles: @vehicles.as_json(include: { organization: { only: [:id, :name] } }) }
+      render json: { vehicles: @vehicles.as_json(include: { organization: { only: [ :id, :name ] } }) }
     end
 
     # GET /api/v1/vehicles/:id
@@ -20,7 +20,7 @@ class Api::V1::VehiclesController < ApplicationController
     # POST /api/v1/vehicles
     def create
       @vehicle = current_user.organization.vehicles.new(vehicle_params)
-      
+
       if @vehicle.save
         render json: @vehicle, status: :created
       else
@@ -55,7 +55,7 @@ class Api::V1::VehiclesController < ApplicationController
 
     # POST /api/v1/vehicles/:id/activate
     def activate
-      if @vehicle.update(status: 'active')
+      if @vehicle.update(status: "active")
         render json: { message: "Vehicle activated successfully" }
       else
         render json: { errors: @vehicle.errors.full_messages }, status: :unprocessable_entity
@@ -71,8 +71,8 @@ class Api::V1::VehiclesController < ApplicationController
     end
 
     def vehicle_params
-      params.require(:vehicle).permit(
-        :plate_number,
+      params.expect(
+        vehicle: [ :plate_number,
         :capacity_volume,
         :capacity_weight,
         :organization_id,
@@ -84,7 +84,7 @@ class Api::V1::VehiclesController < ApplicationController
         :box_type,
         :last_maintenance_date,
         :freezing_available,
-        :box_volume
+        :box_volume ]
       )
     end
 end

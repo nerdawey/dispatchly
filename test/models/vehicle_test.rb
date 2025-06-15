@@ -12,7 +12,7 @@ class VehicleTest < ActiveSupport::TestCase
       model: "Test Model",
       year: 2023,
       box_type: "closed",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true,
       organization: organization
     )
@@ -29,7 +29,7 @@ class VehicleTest < ActiveSupport::TestCase
       model: "Test Model",
       year: 2023,
       box_type: "closed",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true,
       organization: organization
     )
@@ -47,7 +47,7 @@ class VehicleTest < ActiveSupport::TestCase
       model: "Test Model",
       year: 2023,
       box_type: "closed",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true,
       organization: organization
     )
@@ -65,7 +65,7 @@ class VehicleTest < ActiveSupport::TestCase
       model: "Test Model",
       year: 2023,
       box_type: "closed",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true,
       organization: organization
     )
@@ -83,7 +83,7 @@ class VehicleTest < ActiveSupport::TestCase
       model: "Test Model",
       year: 2023,
       box_type: "closed",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true,
       organization: organization
     )
@@ -101,7 +101,7 @@ class VehicleTest < ActiveSupport::TestCase
       status: "active",
       year: 2023,
       box_type: "closed",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true,
       organization: organization
     )
@@ -119,7 +119,7 @@ class VehicleTest < ActiveSupport::TestCase
       status: "active",
       model: "Test Model",
       box_type: "closed",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true,
       organization: organization
     )
@@ -137,7 +137,7 @@ class VehicleTest < ActiveSupport::TestCase
       status: "active",
       model: "Test Model",
       year: 2023,
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true,
       organization: organization
     )
@@ -172,7 +172,7 @@ class VehicleTest < ActiveSupport::TestCase
       model: "Test Model",
       year: 2023,
       box_type: "closed",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true
     )
     assert_not vehicle.valid?
@@ -190,7 +190,7 @@ class VehicleTest < ActiveSupport::TestCase
       model: "Test Model",
       year: 2023,
       box_type: "open",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true,
       organization: organization
     )
@@ -209,7 +209,7 @@ class VehicleTest < ActiveSupport::TestCase
       model: "Test Model",
       year: 2023,
       box_type: "closed",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true,
       organization: organization
     )
@@ -227,7 +227,7 @@ class VehicleTest < ActiveSupport::TestCase
       model: "Test Model",
       year: 2023,
       box_type: "open",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: false,
       organization: organization
     )
@@ -245,7 +245,7 @@ class VehicleTest < ActiveSupport::TestCase
       model: "Test Model",
       year: 2023,
       box_type: "closed",
-      last_maintenance_date: Date.today,
+      last_maintenance_date: Time.zone.today,
       freezing_available: true,
       organization: organization
     )
@@ -259,7 +259,7 @@ class VehicleTest < ActiveSupport::TestCase
     organization = organizations(:one)
     vehicle = vehicles(:one)
     vehicle.update!(status: "active")
-    vehicle.trips.where(status: ["in_progress", "scheduled"]).destroy_all
+    vehicle.trips.where(status: [ "in_progress", "scheduled" ]).destroy_all
 
     assert vehicle.available?
   end
@@ -268,7 +268,7 @@ class VehicleTest < ActiveSupport::TestCase
     organization = organizations(:one)
     vehicle = vehicles(:one)
     vehicle.update!(status: "inactive")
-    vehicle.trips.where(status: ["in_progress", "scheduled"]).destroy_all
+    vehicle.trips.where(status: [ "in_progress", "scheduled" ]).destroy_all
 
     assert_not vehicle.available?
   end

@@ -28,11 +28,11 @@ class OrderClusteringService
         end
       end
 
-      clusters << [order] unless added
+      clusters << [ order ] unless added
     end
 
     # Return as a hash for compatibility
-    Hash[clusters.each_with_index.map { |c, i| ["cluster_#{i+1}".to_sym, c] }]
+    Hash[clusters.each_with_index.map { |c, i| [ "cluster_#{i+1}".to_sym, c ] }]
     end
 
     private

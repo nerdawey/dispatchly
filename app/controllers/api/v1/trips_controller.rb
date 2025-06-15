@@ -5,7 +5,7 @@ class Api::V1::TripsController < ApplicationController
     # GET /api/v1/trip
     def index
       if current_user.super_admin?
-        @trips = Trip.all.includes(:vehicle, :orders).order(created_at: :desc)
+        @trips = Trip.includes(:vehicle, :orders).order(created_at: :desc)
       else
         @trips = current_user.organization.trips
           .includes(:vehicle, :orders)
@@ -256,14 +256,14 @@ class Api::V1::TripsController < ApplicationController
     def confirm
       # Get proposed trips from Redis
       proposed_data = RedisService.get_proposed_trips(current_user.id)
-      return render json: { error: 'No proposed trips found' }, status: :not_found unless proposed_data
+      return render json: { error: "No proposed trips found" }, status: :not_found unless proposed_data
 
       # Get confirmed trip IDs from params
       confirmed_trip_ids = params[:confirmed_trip_ids]
-      return render json: { error: 'No trips selected for confirmation' }, status: :bad_request if confirmed_trip_ids.blank?
+      return render json: { error: "No trips selected for confirmation" }, status: :bad_request if confirmed_trip_ids.blank?
 
       # Filter trips to only include confirmed ones
-      trips_to_save = proposed_data['trips'].select { |trip| confirmed_trip_ids.include?(trip['id']) }
+      trips_to_save = proposed_data["trips"].select { |trip| confirmed_trip_ids.include?(trip["id"]) }
 
       # Save confirmed trips to database
       saved_trips = []
@@ -275,21 +275,21 @@ class Api::V1::TripsController < ApplicationController
           begin
             # Create the trip
             trip = current_user.organization.trips.create!(
-              vehicle_id: trip_data['vehicle_id'],
-              status: 'pending',
+              vehicle_id: trip_data["vehicle_id"],
+              status: "pending",
               scheduled_date: Date.current,
-              name: trip_data['name'] || "Trip ##{SecureRandom.hex(4)}",
+              name: trip_data["name"] || "Trip ##{SecureRandom.hex(4)}",
               start_time: Time.current,
               end_time: nil
             )
 
-            trip_data['order_ids'].each do |order_id|
+            trip_data["order_ids"].each do |order_id|
               begin
                 order = current_user.organization.orders.find(order_id)
                 Rails.logger.info "[CONFIRM] Updating Order #{order.id}: current status=#{order.status}, trip_id=#{order.trip_id}"
                 order.update!(
                   trip_id: trip.id,
-                  status: 'dispatched'
+                  status: "dispatched"
                 )
                 Rails.logger.info "[CONFIRM] Order #{order.id} updated! New status=#{order.status}, trip_id=#{order.trip_id}"
                 updated_orders << { id: order.id, status: order.status, trip_id: order.trip_id }
@@ -305,7 +305,7 @@ class Api::V1::TripsController < ApplicationController
           rescue => e
             Rails.logger.error "[CONFIRM] Failed to create trip for vehicle #{trip_data['vehicle_id']}: #{e.message}"
             Rails.logger.error e.backtrace.join("\n")
-            errors << { trip_id: trip_data['id'], error: e.message }
+            errors << { trip_id: trip_data["id"], error: e.message }
             raise ActiveRecord::Rollback
           end
         end
@@ -338,14 +338,14 @@ class Api::V1::TripsController < ApplicationController
     end
     
     def trip_params
-      params.require(:trip).permit(
-        :name,
+      params.expect(
+        trip: [:name,
         :vehicle_id,
         :status,
         :scheduled_date,
         :start_time,
         :end_time,
-        order_ids: []
+        order_ids: []]
       )
     end
   end
